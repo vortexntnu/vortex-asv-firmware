@@ -28,7 +28,8 @@
   bool armed;
   bool FS_locked = true;
   bool all_sys_go = false;
-  
+//Declare functions
+void status_lights();  
 
 void setup() {
   //Serial.begin(9600);
@@ -58,7 +59,6 @@ void setup() {
 }
 
 void loop() {
-  
   while (true){
     armed = digitalRead(inpA0);
     if (armed){
