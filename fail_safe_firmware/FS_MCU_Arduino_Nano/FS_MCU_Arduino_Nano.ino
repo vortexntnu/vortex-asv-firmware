@@ -1,159 +1,158 @@
 
-//This Fail Safe firmware is used on an Arduino Nano, to read DC signals from the PWM MCU, Hardware Kill switch and Software kill Switch in order to securely operate the ASV.
+//This Fail Safe firmware is used on an Arduino Nano, to read DC signals from the PWM MCU, Hardware kill switch and Software kill switch in order to control the thruster relays and securely operate the ASV. It also controls the status indicator lights for the ASV, so that nearby traffic may act accordingly.
 
 //DC input pins
-  const byte inpA0 = 14;    //Arm
-  const byte inpA1 = 15;    //OtA Kill Switch
-  const byte inpA2 = 16;    //HW Kill Switch
-  const byte inpA3 = 17;    //inverted SW Kill Switch
+  const byte pin_arm_input = 14;    //Pin A0: RX Arm
+  const byte pin_OtA_KS_input = 15;    //Pin A1: RX Over the Air Kill Switch
+  const byte pin_HW_KS_input = 16;    //Pin A2: HW Kill Switch
+  const byte pin_SW_KS_input = 17;    //Pin A3: inverted SW Kill Switch
 
-  const byte inpA5 = 19;    //Operation Mode -- Autonomous/Manual
+  const byte pin_operation_mode_input = 19;    //Pin A5: Operation Mode -- Software/Manual RX
 
 //DC output pins
-  const byte outA4 = A4;    //SW Kill switch return
+  const byte pin_SW_fail_safe_status_output = 18;    //Pin A4: SW Kill switch return
   
-  const byte outD2 = 2;   //MCU mosfet --- MAIN OUTPUT
-  const byte outD3 = 3;   //LED KS locked
-  const byte outD4 = 4;   //Status light Y
+  const byte pin_main_output = 2;   //Pin D2: MCU fail safe system MAIN OUTPUT
+  const byte pin_LED_FS_locked_output = 3;   //Pin D3: LED KS locked
+  const byte pin_status_light_Y_output = 4;   //Pin D4: Status light Y
   
-  const byte outD6 = 6;   //LED Armed
-  const byte outD7 = 7;   //Status light B
-  const byte outD8 = 8;   //Status light G
-  const byte outD9 = 9;   //LED SW KS
-  const byte outD10 = 10;   //LED HW KS
-  const byte outD11 = 11;   //LED OtA KS
-  const byte outD12 = 12;   //Status light R
+  const byte pin_LED_armed_output = 6;   //Pin D6: LED Armed
+  const byte pin_status_light_B_output = 7;   //Pin D7: Status light B
+  const byte pin_status_light_G_output = 8;   //Pin D8: Status light G
+  const byte pin_LED_SW_KS_status_output = 9;   //Pin D9: LED SW KS
+  const byte pin_LED_HW_KS_status_output = 10;   //Pin D10: LED HW KS
+  const byte pin_LED_OtA_KS_status_output = 11;   //Pin D11: LED OtA KS
+  const byte pin_status_light_R_output = 12;   //Pin D12: Status light R
 
 //Variables
   bool armed;
-  bool FS_locked = true;
-  bool all_sys_go = false;
+  bool fail_safe_locked = true;
+  bool all_systems_go;
 //Declare functions
-void status_lights();  
+  void test_fail_safe_trigger(byte input_pin, byte LED_output_pin);
+  void set_main_output(bool main_output_value);
+  void status_lights();  
+  void set_RGBY(bool R, bool G, bool B, bool Y);
+
 
 void setup() {
   //Serial.begin(9600);
   
   //setup input pins
-  pinMode(inpA0, INPUT_PULLUP);
-  pinMode(inpA1, INPUT_PULLUP);
-  pinMode(inpA2, INPUT_PULLUP);
-  pinMode(inpA3, INPUT_PULLUP);
+  pinMode(pin_arm_input, INPUT_PULLUP);
+  pinMode(pin_OtA_KS_input, INPUT_PULLUP);
+  pinMode(pin_HW_KS_input, INPUT_PULLUP);
+  pinMode(pin_SW_KS_input, INPUT_PULLUP);
   
-  pinMode(inpA5, INPUT_PULLUP);
+  pinMode(pin_operation_mode_input, INPUT_PULLUP);
 
   //setup output pins
-  pinMode(outA4, OUTPUT);
-  pinMode(outD2, OUTPUT);
-  pinMode(outD3, OUTPUT);
-  pinMode(outD4, OUTPUT);
+  pinMode(pin_SW_fail_safe_status_output, OUTPUT);
+  pinMode(pin_main_output, OUTPUT);
+  pinMode(pin_LED_FS_locked_output, OUTPUT);
+  pinMode(pin_status_light_Y_output, OUTPUT);
   
-  pinMode(outD6, OUTPUT);
-  pinMode(outD7, OUTPUT);
-  pinMode(outD8, OUTPUT);
-  pinMode(outD9, OUTPUT);
-  pinMode(outD10, OUTPUT);
-  pinMode(outD11, OUTPUT);
-  pinMode(outD12, OUTPUT);
+  pinMode(pin_LED_armed_output, OUTPUT);
+  pinMode(pin_status_light_B_output, OUTPUT);
+  pinMode(pin_status_light_G_output, OUTPUT);
+  pinMode(pin_LED_SW_KS_status_output, OUTPUT);
+  pinMode(pin_LED_HW_KS_status_output, OUTPUT);
+  pinMode(pin_LED_OtA_KS_status_output, OUTPUT);
+  pinMode(pin_status_light_R_output, OUTPUT);
 
 }
 
 void loop() {
   while (true){
-    armed = digitalRead(inpA0);
+    armed = digitalRead(pin_arm_input);
     if (armed){
-      digitalWrite(outD6,HIGH);   //LED Armed HIGH
+      digitalWrite(pin_LED_armed_output,HIGH);
     }
     else{
-      digitalWrite(outD6,LOW);    //LED Armed LOW
+      digitalWrite(pin_LED_armed_output,LOW);
     }
         
-    if (FS_locked){
+    if (fail_safe_locked){
       
       //try to unlock KS
       if (armed){
         continue;
       }
       else{
-        FS_locked = false;
-        digitalWrite(outD3,LOW);   //LED Locked LOW
+        fail_safe_locked = false;
+        digitalWrite(pin_LED_FS_locked_output,LOW);
         continue;
       }
     }
     
     //KS not locked
     else{
+      //assume all is well, but check if any tests fail 
+      all_systems_go = true;
+      
       //OtA KS test
-      if (digitalRead(inpA1)){
-        digitalWrite(outD11,HIGH);    //LED OtA KS HIGH
-        
-        //HW KS test
-        if(digitalRead(inpA2)){
-          digitalWrite(outD11,HIGH);    //LED HW KS HIGH
-          
-          //SW KS test
-          if (digitalRead(inpA3)){
-            digitalWrite(outD9,HIGH);    //LED SW KS HIGH
-            digitalWrite(outD2,LOW);    //MCU mosfet --- MAIN OUTPUT set LOW
-            all_sys_go = false;
-            continue;
-          }
-          else{
-            digitalWrite(outD9,LOW);    //LED SW KS LOW
-            if(armed){
-              //Set MAIN OUTPUT HIGH
-              digitalWrite(outD2,HIGH);    //MCU mosfet --- MAIN OUTPUT set HIGH
-              all_sys_go = true;
-              continue;
-            }
-            else{
-              digitalWrite(outD2,LOW);    //MCU mosfet --- MAIN OUTPUT set LOW
-              all_sys_go = false;
-              continue;
-            }
-          }
+      test_fail_safe_trigger(pin_OtA_KS_input, pin_LED_OtA_KS_status_output);
+      
+      //SW KS test
+      test_fail_safe_trigger(pin_SW_KS_input, pin_LED_SW_KS_status_output);
+      
+      //HW KS test
+      test_fail_safe_trigger(pin_HW_KS_input, pin_LED_HW_KS_status_output);
+      
+      if(armed){
+        if (all_systems_go){
+          set_main_output(HIGH);
         }
-        //HW KS low
         else{
-          digitalWrite(outD2,LOW);    //MCU mosfet --- MAIN OUTPUT set LOW
-          digitalWrite(outD11,LOW);    //LED HW KS LOW
-          FS_locked = true;
-          all_sys_go = false;
-        }
+          set_main_output(LOW);
+        } 
       }
-      //OtA KS low
       else{
-        digitalWrite(outD11,LOW);    //LED OtA KS LOW
-        digitalWrite(outD2,LOW);    //MCU mosfet --- MAIN OUTPUT set LOW
-        FS_locked = true;
-      }    
+        set_main_output(LOW);
+      }
     }
-    status_lights();
+    status_lights();   
   }
 }
 
+void test_fail_safe_trigger(byte input_pin, byte LED_output_pin){
+  if (digitalRead(input_pin)){
+      digitalWrite(LED_output_pin,HIGH);
+    }
+    else{
+      all_systems_go = false;
+      set_main_output(LOW);
+      digitalWrite(LED_output_pin,LOW);
+    }
+}
+
+void set_main_output(bool main_output_value){
+  digitalWrite(pin_main_output, main_output_value);               //Set fail safe main output
+  digitalWrite(pin_SW_fail_safe_status_output, main_output_value);//Tell SW current status of FS
+  
+}
+
 void status_lights(){
-  if (all_sys_go){
-    if(digitalRead(inpA5)){
+  //Set pins to control the status light indicating ASV operation mode
+  if (all_systems_go){
+    if(digitalRead(pin_operation_mode_input)){
       //Manual
-      digitalWrite(outD12,LOW);    //RED status pin 
-      digitalWrite(outD8,LOW);    //GREEN status pin 
-      digitalWrite(outD7,LOW);    //BLUE status pin 
-      digitalWrite(outD4,HIGH);    //YELLOW status pin 
+      set_RGBY(LOW,LOW,LOW,HIGH);
     }
     else{
       //Autonomous
-      digitalWrite(outD12,LOW);    //RED status pin 
-      digitalWrite(outD8,HIGH);    //GREEN status pin 
-      digitalWrite(outD7,LOW);    //BLUE status pin 
-      digitalWrite(outD4,LOW);    //YELLOW status pin 
+      set_RGBY(LOW, HIGH, LOW, LOW);
     }
   }
   else{
     //KS triggered
-    digitalWrite(outD12,HIGH);    //RED status pin 
-    digitalWrite(outD8,LOW);    //GREEN status pin 
-    digitalWrite(outD7,LOW);    //BLUE status pin 
-    digitalWrite(outD4,LOW);    //YELLOW status pin 
+    set_RGBY(HIGH, LOW, LOW, LOW); 
   }
+}
+
+void set_RGBY(bool R, bool G, bool B, bool Y){
+  digitalWrite(pin_status_light_R_output, R);    //RED status pin 
+  digitalWrite(pin_status_light_G_output, G);    //GREEN status pin 
+  digitalWrite(pin_status_light_B_output, B);    //BLUE status pin 
+  digitalWrite(pin_status_light_Y_output, Y);    //YELLOW status pin
 }
