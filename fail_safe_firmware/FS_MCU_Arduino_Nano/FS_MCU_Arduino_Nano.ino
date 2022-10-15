@@ -34,6 +34,7 @@
   bool armed;
   bool fail_safe_locked = true;
   bool all_systems_go;
+  
 //Declare functions
   void test_fail_safe_trigger(byte input_pin, byte LED_output_pin);
   void set_main_output(bool main_output_value);

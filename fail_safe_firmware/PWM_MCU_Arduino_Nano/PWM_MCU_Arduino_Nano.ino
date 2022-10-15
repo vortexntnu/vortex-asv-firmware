@@ -22,7 +22,16 @@ const byte pin_arm_output = 17;    //A3: Arm system - 5VDC out
 const byte pin_selector_output = 18;    //A4: ESC PWM selector DC - 5 VDC out
 const byte pin_RX_timeout_output = 19;    //A5: RX timeout - 5 VDC out
 
-//rising edge - duty cycle - start time variables
+//RX timeout limit
+const unsigned long max_wait = 1000000; //1 second
+
+//declare functions
+void interrupt_inpD2();
+void interrupt_inpD3();
+void pwm_read(byte pin, unsigned long rise_time, bool old_state);
+void RX_timeout_check(unsigned long rise_time);
+
+//rising edge - duty cycle start time variables
 unsigned long rise_inpD2;
 unsigned long rise_inpD3;
 unsigned long rise_inpD8;
@@ -32,8 +41,6 @@ bool OtA_KS_state = LOW;
 bool arm_state = LOW;
 bool selector_state = LOW;
 
-//RX timeout limit
-const unsigned long max_wait = 1000000; //1 second
 
 
 void setup() {
@@ -118,7 +125,7 @@ void pwm_read(byte pin, unsigned long rise_time, bool old_state){
   }
 }
 
-void RX_timeout_check(double long rise_time){
+void RX_timeout_check(unsigned long rise_time){
   unsigned long wait = micros()-rise_time;
   if (wait>max_wait){
     digitalWrite(pin_RX_timeout_output, LOW);
