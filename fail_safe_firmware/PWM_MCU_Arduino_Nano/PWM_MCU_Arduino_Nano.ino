@@ -10,41 +10,52 @@ const int top_lim_DC_LOW  = 1200;    //gives LOW output, measured in [us]
 const int bttm_lim_DC_LOW = 800;     //gives LOW output, measured in [us]
 
 //PWM input pins
-const byte inpD2 = 2;   //OtA Kill Switch - 5V PWM input
-const byte inpD3 = 3;   //Arm system - 5V PWM input
-const byte inpD8 = 8;   //ESC selector for MUX - 5V PWM input
+const byte pin_OtA_KS_input = 2;   //D2: OtA Kill Switch - 5V PWM input
+const byte pin_arm_input = 3;   //D3: Arm system - 5V PWM input
+const byte pin_MUX_selector_input = 8;   //D8: ESC selector for MUX - 5V PWM input
 
 //bool output pins
-const byte outA0 = 14;    //OtA Kill Switch 1 - 5VDC out
-const byte outA1 = 15;    //OtA Kill Switch 2 - 5VDC out
-const byte outA2 = 16;    //OtA Kill Switch LED - 5VDC out
-const byte outA3 = 17;    //Arm system - 5VDC out
-const byte outA4 = A4;    //ESC PWM selector DC
+const byte pin_OtA_KS_output1 = 14;    //A0: OtA Kill Switch 1 - 5VDC out
+const byte pin_OtA_KS_output2 = 15;    //A1: OtA Kill Switch 2 - 5VDC out
+const byte pin_OtA_KS_LED_output = 16;    //A2: OtA Kill Switch LED - 5VDC out
+const byte pin_arm_output = 17;    //A3: Arm system - 5VDC out
+const byte pin_selector_output = 18;    //A4: ESC PWM selector DC - 5 VDC out
+const byte pin_RX_timeout_output = 19;    //A5: RX timeout - 5 VDC out
 
 //rising edge - duty cycle - start time variables
 unsigned long rise_inpD2;
 unsigned long rise_inpD3;
 unsigned long rise_inpD8;
 
+//output state storage
+bool OtA_KS_state = LOW;
+bool arm_state = LOW;
+bool selector_state = LOW;
+
+//RX timeout limit
+const unsigned long max_wait = 1000000; //1 second
+
+
 void setup() {
   //Serial.begin(9600);
   
   //setup input pins
-  pinMode(inpD2, INPUT_PULLUP);
-  pinMode(inpD3, INPUT_PULLUP);
-  pinMode(inpD8, INPUT_PULLUP);
+  pinMode(pin_OtA_KS_input, INPUT_PULLUP);
+  pinMode(pin_arm_input, INPUT_PULLUP);
+  pinMode(pin_MUX_selector_input, INPUT_PULLUP);
 
   //setup output pins
-  pinMode(outA0, OUTPUT);
-  pinMode(outA1, OUTPUT);
-  pinMode(outA2, OUTPUT);
-  pinMode(outA3, OUTPUT);
-  pinMode(outA4, OUTPUT);
+  pinMode(pin_OtA_KS_output1, OUTPUT);
+  pinMode(pin_OtA_KS_output2, OUTPUT);
+  pinMode(pin_OtA_KS_LED_output, OUTPUT);
+  pinMode(pin_arm_output, OUTPUT);
+  pinMode(pin_selector_output, OUTPUT);
+  pinMode(pin_RX_timeout_output, OUTPUT);
   
   //setup interrupts
     //Hardware interrupts
-      attachInterrupt(digitalPinToInterrupt(inpD2), interrupt_inpD2, CHANGE);
-      attachInterrupt(digitalPinToInterrupt(inpD3), interrupt_inpD3, CHANGE);
+      attachInterrupt(digitalPinToInterrupt(pin_OtA_KS_input), interrupt_inpD2, CHANGE);
+      attachInterrupt(digitalPinToInterrupt(pin_arm_input), interrupt_inpD3, CHANGE);
     //Software interrupt
       //Enable PCIE0 Bit 0 = 1(Port B)
       PCICR |= B00000001;
@@ -53,80 +64,69 @@ void setup() {
 }
 
 //required empty function. Will probably be used to check radio communication integrity.
-void loop() {}
+void loop() {
+  RX_timeout_check(rise_inpD2);
+  RX_timeout_check(rise_inpD3);
+  RX_timeout_check(rise_inpD8);
+}
 
 void interrupt_inpD2() {
-  
-  //Rising edge
-  if (digitalRead(inpD2) == HIGH){
-    rise_inpD2 = micros();
-  }
-  else{
-    //Pin low --> Falling edge
-    unsigned long duration = micros() - rise_inpD2;
-    if (bttm_lim_DC_HIGH < duration){
-      if ( duration < top_lim_DC_HIGH){
-        digitalWrite(outA0, HIGH);   // turn the output HIGH
-        digitalWrite(outA1, HIGH);   // turn the output HIGH
-        digitalWrite(outA2, HIGH);   // turn the output HIGH
-        
-      }
-    }
-    else if (bttm_lim_DC_LOW<duration){
-      if(duration<top_lim_DC_LOW){
-        digitalWrite(outA0, LOW);   // turn the output LOW
-        digitalWrite(outA1, LOW);   // turn the output LOW
-        digitalWrite(outA2, LOW);   // turn the output LOW
-      }
-      
-    }    
-  }
+  pwm_read(pin_OtA_KS_input,rise_inpD2, OtA_KS_state);
+  // update the outputs
+  digitalWrite(pin_OtA_KS_output1, OtA_KS_state);
+  digitalWrite(pin_OtA_KS_output2, OtA_KS_state);
+  digitalWrite(pin_OtA_KS_LED_output, OtA_KS_state);
+
 }
 
 void interrupt_inpD3() {
+  pwm_read(pin_arm_input,rise_inpD3, arm_state);
+  // update the output
+  digitalWrite(pin_arm_output, arm_state);
 
-  //Rising edge
-  if (digitalRead(inpD3) == HIGH){
-    rise_inpD3 = micros();
-  }
-  else{
-    //Pin low --> Falling edge
-    unsigned long duration = micros() - rise_inpD3;
-    if (bttm_lim_DC_HIGH < duration){
-      if ( duration < top_lim_DC_HIGH){
-        digitalWrite(outA3, HIGH);   // turn the output HIGH
-      }
-    }
-    else if (bttm_lim_DC_LOW<duration){
-      if(duration<top_lim_DC_LOW){
-        digitalWrite(outA3, LOW);   // turn the output LOW
-      }
-    }
-  }
 }
 
 ISR (PCINT0_vect){
   // Interrupt for Port B
+  pwm_read(pin_MUX_selector_input,rise_inpD8, selector_state);
+  // update the output
+  digitalWrite(pin_selector_output, selector_state);
+  
+}
 
+
+
+void pwm_read(byte pin, unsigned long rise_time, bool old_state){
   //Rising edge
-  if (digitalRead(inpD8) == HIGH){
-    rise_inpD8 = micros();
-    
+  if (digitalRead(pin) == HIGH){
+    rise_time = micros();
+    return;
   }
   else{
     //Pin low --> Falling edge
-    unsigned long duration = micros() - rise_inpD8;
+    unsigned long duration = micros() - rise_time;
     if (bttm_lim_DC_HIGH < duration){
       if ( duration < top_lim_DC_HIGH){
-        digitalWrite(outA4, HIGH);   // turn the output HIGH
+        old_state = HIGH;   // turn the output HIGH
+        return;
       }
     }
     else if (bttm_lim_DC_LOW<duration){
-      
       if(duration<top_lim_DC_LOW){
-        
-        digitalWrite(outA4, LOW);   // turn the output LOW
-      } 
-    }   
+        old_state = LOW;   // turn the output LOW
+        return;
+      }
+    }
   }
+}
+
+void RX_timeout_check(double long rise_time){
+  unsigned long wait = micros()-rise_time;
+  if (wait>max_wait){
+    digitalWrite(pin_RX_timeout_output, LOW);
+  }
+  else{
+    digitalWrite(pin_RX_timeout_output, HIGH);
+  }
+
 }
