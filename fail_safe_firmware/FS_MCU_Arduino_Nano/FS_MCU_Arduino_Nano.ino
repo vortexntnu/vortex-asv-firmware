@@ -77,18 +77,17 @@ void loop() {
     }
     else{
       digitalWrite(pin_LED_armed_output,LOW);
+      set_main_output(LOW);
     }
         
     if (fail_safe_locked){
       
       //try to unlock KS
       if (armed){
-        continue;
       }
       else{
         fail_safe_locked = false;
         digitalWrite(pin_LED_FS_locked_output,LOW);
-        continue;
       }
     }
     
