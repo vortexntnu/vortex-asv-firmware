@@ -63,7 +63,7 @@ void setup() {
       PCMSK0 |= B00000001;
 }
 
-//required empty function. Will probably be used to check radio communication integrity.
+//Check radio communication integrity. The RX sets all outputs low on signal loss.
 void loop() {
   RX_timeout_check(rise_inpD2);
   RX_timeout_check(rise_inpD3);
