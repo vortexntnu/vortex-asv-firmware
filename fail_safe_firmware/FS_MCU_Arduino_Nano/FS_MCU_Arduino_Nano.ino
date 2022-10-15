@@ -5,7 +5,7 @@
   const byte pin_arm_input = 14;    //Pin A0: RX Arm
   const byte pin_OtA_KS_input = 15;    //Pin A1: RX Over the Air Kill Switch
   const byte pin_HW_KS_input = 16;    //Pin A2: HW Kill Switch
-  // const byte pin_SW_KS_input = 17;    //Pin A3: SW Kill Switch
+  const byte pin_RX_timeout_input = 17;    //Pin A3: RX timeout, if low then err
 
   const byte pin_RX_operation_mode_input = 19;    //Pin A5: Operation Mode -- Software/Manual RX
   const byte pin_SW_KS_input = 20;    //Pin A6: SW Kill Switch
@@ -17,7 +17,7 @@
   const byte pin_main_output = 2;   //Pin D2: MCU fail safe system MAIN OUTPUT
   const byte pin_LED_FS_locked_output = 3;   //Pin D3: LED KS locked
   const byte pin_status_light_Y_output = 4;   //Pin D4: Status light Y
-  
+  const byte pin_LED_RX_timeout_output = 4;   //Pin D5: LED RX timeout
   const byte pin_LED_armed_output = 6;   //Pin D6: LED Armed
   const byte pin_status_light_B_output = 7;   //Pin D7: Status light B
   const byte pin_status_light_G_output = 8;   //Pin D8: Status light G
@@ -48,9 +48,8 @@ void setup() {
   pinMode(pin_arm_input, INPUT_PULLUP);
   pinMode(pin_OtA_KS_input, INPUT_PULLUP);
   pinMode(pin_HW_KS_input, INPUT_PULLUP);
+  pinMode(pin_RX_timeout_input, INPUT_PULLUP);
 
-  // pinMode(pin_SW_KS_input, INPUT_PULLUP);
-  
   pinMode(pin_RX_operation_mode_input, INPUT_PULLUP);
 
   //setup output pins
@@ -58,7 +57,7 @@ void setup() {
   pinMode(pin_main_output, OUTPUT);
   pinMode(pin_LED_FS_locked_output, OUTPUT);
   pinMode(pin_status_light_Y_output, OUTPUT);
-  
+  pinMode(pin_LED_RX_timeout_output, OUTPUT);
   pinMode(pin_LED_armed_output, OUTPUT);
   pinMode(pin_status_light_B_output, OUTPUT);
   pinMode(pin_status_light_G_output, OUTPUT);
@@ -101,6 +100,9 @@ void loop() {
       
       //HW KS test
       test_fail_safe_trigger(pin_HW_KS_input, pin_LED_HW_KS_status_output);
+      
+      //RX timeout test
+      test_fail_safe_trigger(pin_RX_timeout_input, pin_LED_RX_timeout_output);
       
       //SW KS test
       if (analogRead(pin_SW_KS_input)>analog_logic_high_cutoff){
