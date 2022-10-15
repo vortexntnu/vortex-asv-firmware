@@ -17,7 +17,7 @@
   const byte pin_main_output = 2;   //Pin D2: MCU fail safe system MAIN OUTPUT
   const byte pin_LED_FS_locked_output = 3;   //Pin D3: LED KS locked
   const byte pin_status_light_Y_output = 4;   //Pin D4: Status light Y
-  const byte pin_LED_RX_timeout_output = 4;   //Pin D5: LED RX timeout
+  const byte pin_LED_RX_timeout_output = 5;   //Pin D5: LED RX timeout
   const byte pin_LED_armed_output = 6;   //Pin D6: LED Armed
   const byte pin_status_light_B_output = 7;   //Pin D7: Status light B
   const byte pin_status_light_G_output = 8;   //Pin D8: Status light G
