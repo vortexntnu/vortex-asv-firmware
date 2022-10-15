@@ -5,9 +5,11 @@
   const byte pin_arm_input = 14;    //Pin A0: RX Arm
   const byte pin_OtA_KS_input = 15;    //Pin A1: RX Over the Air Kill Switch
   const byte pin_HW_KS_input = 16;    //Pin A2: HW Kill Switch
-  const byte pin_SW_KS_input = 17;    //Pin A3: inverted SW Kill Switch
+  // const byte pin_SW_KS_input = 17;    //Pin A3: SW Kill Switch
 
-  const byte pin_operation_mode_input = 19;    //Pin A5: Operation Mode -- Software/Manual RX
+  const byte pin_RX_operation_mode_input = 19;    //Pin A5: Operation Mode -- Software/Manual RX
+  const byte pin_SW_KS_input = 20;    //Pin A6: SW Kill Switch
+  const byte pin_SW_operation_mode_input = 21;    //Pin A7: Software Operation Mode -- Manual/Autonomous
 
 //DC output pins
   const byte pin_SW_fail_safe_status_output = 18;    //Pin A4: SW Kill switch return
@@ -23,6 +25,10 @@
   const byte pin_LED_HW_KS_status_output = 10;   //Pin D10: LED HW KS
   const byte pin_LED_OtA_KS_status_output = 11;   //Pin D11: LED OtA KS
   const byte pin_status_light_R_output = 12;   //Pin D12: Status light R
+
+//The SW inputs may send 3.3 V or less and therefore need to be read by the ADC
+//The analog range 0V to 5V corresponds to the integer range 0 to 1023.
+  const int analog_logic_high_cutoff =  670;
 
 //Variables
   bool armed;
@@ -42,9 +48,10 @@ void setup() {
   pinMode(pin_arm_input, INPUT_PULLUP);
   pinMode(pin_OtA_KS_input, INPUT_PULLUP);
   pinMode(pin_HW_KS_input, INPUT_PULLUP);
-  pinMode(pin_SW_KS_input, INPUT_PULLUP);
+
+  // pinMode(pin_SW_KS_input, INPUT_PULLUP);
   
-  pinMode(pin_operation_mode_input, INPUT_PULLUP);
+  pinMode(pin_RX_operation_mode_input, INPUT_PULLUP);
 
   //setup output pins
   pinMode(pin_SW_fail_safe_status_output, OUTPUT);
@@ -93,11 +100,18 @@ void loop() {
       //OtA KS test
       test_fail_safe_trigger(pin_OtA_KS_input, pin_LED_OtA_KS_status_output);
       
-      //SW KS test
-      test_fail_safe_trigger(pin_SW_KS_input, pin_LED_SW_KS_status_output);
-      
       //HW KS test
       test_fail_safe_trigger(pin_HW_KS_input, pin_LED_HW_KS_status_output);
+      
+      //SW KS test
+      if (analogRead(pin_SW_KS_input)>analog_logic_high_cutoff){
+        digitalWrite(pin_LED_SW_KS_status_output,HIGH);
+      }
+      else{
+        all_systems_go = false;
+        set_main_output(LOW);
+        digitalWrite(pin_LED_SW_KS_status_output,LOW);
+      }
       
       if(armed){
         if (all_systems_go){
@@ -133,15 +147,22 @@ void set_main_output(bool main_output_value){
 }
 
 void status_lights(){
-  //Set pins to control the status light indicating ASV operation mode
+  //Set pins to control the status light indicating ASV operation mode. Reference the Vortex Wiki for more info.
   if (all_systems_go){
-    if(digitalRead(pin_operation_mode_input)){
+    if(digitalRead(pin_RX_operation_mode_input)){
       //Manual
       set_RGBY(LOW,LOW,LOW,HIGH);
     }
     else{
-      //Autonomous
-      set_RGBY(LOW, HIGH, LOW, LOW);
+      //SW controlled
+      if (analogRead(pin_SW_operation_mode_input)>analog_logic_high_cutoff){
+        //Software manual control
+        set_RGBY(LOW,LOW,LOW,HIGH);
+      }
+      else{
+        //Autonomous
+        set_RGBY(LOW, HIGH, LOW, LOW);
+      }
     }
   }
   else{
