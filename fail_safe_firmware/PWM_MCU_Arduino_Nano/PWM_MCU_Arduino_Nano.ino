@@ -1,6 +1,6 @@
 //This firmware is used on an Arduino Nano, to interpret 50Hz RC PWM signals from a FrSky Radio Reciever and relay those to the Fail Safe MCU.
 
-//ATTENTION: Do not upload while sending PWM signals to pins, this causes errors and results in an aborted upload. (This is presumably caused by harware interrupts halting upload while triggered.)
+//ATTENTION: Do not upload while sending PWM signals to pins, this causes errors and results in an aborted upload. (This is presumably caused by hardware interrupts halting upload while triggered.)
 
 
 //duty cycle range values, if outside range: do nothing
@@ -71,7 +71,7 @@ void loop() {
 }
 
 void interrupt_inpD2() {
-  pwm_read(pin_OtA_KS_input,rise_inpD2, OtA_KS_state);
+  pwm_read(pin_OtA_KS_input, rise_inpD2, OtA_KS_state);
   // update the outputs
   digitalWrite(pin_OtA_KS_output1, OtA_KS_state);
   digitalWrite(pin_OtA_KS_output2, OtA_KS_state);
@@ -80,7 +80,7 @@ void interrupt_inpD2() {
 }
 
 void interrupt_inpD3() {
-  pwm_read(pin_arm_input,rise_inpD3, arm_state);
+  pwm_read(pin_arm_input, rise_inpD3, arm_state);
   // update the output
   digitalWrite(pin_arm_output, arm_state);
 
@@ -88,13 +88,11 @@ void interrupt_inpD3() {
 
 ISR (PCINT0_vect){
   // Interrupt for Port B
-  pwm_read(pin_MUX_selector_input,rise_inpD8, selector_state);
+  pwm_read(pin_MUX_selector_input, rise_inpD8, selector_state);
   // update the output
   digitalWrite(pin_selector_output, selector_state);
   
 }
-
-
 
 void pwm_read(byte pin, unsigned long rise_time, bool old_state){
   //Rising edge
@@ -128,5 +126,4 @@ void RX_timeout_check(double long rise_time){
   else{
     digitalWrite(pin_RX_timeout_output, HIGH);
   }
-
 }
