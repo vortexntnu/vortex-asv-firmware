@@ -111,6 +111,7 @@ void loop() {
       }
       else{
         all_systems_go = false;
+        fail_safe_locked = true;
         set_main_output(LOW);
         digitalWrite(pin_LED_SW_KS_status_output,LOW);
       }
@@ -137,6 +138,7 @@ void test_fail_safe_trigger(byte input_pin, byte LED_output_pin){
     }
     else{
       all_systems_go = false;
+      fail_safe_locked = true;
       set_main_output(LOW);
       digitalWrite(LED_output_pin,LOW);
     }
