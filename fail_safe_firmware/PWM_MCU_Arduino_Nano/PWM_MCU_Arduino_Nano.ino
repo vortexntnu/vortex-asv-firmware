@@ -17,9 +17,9 @@ const byte pin_MUX_selector_input = 8;   //D8: ESC selector for MUX - 5V PWM inp
 //bool output pins
 const byte pin_OtA_KS_output1 = 14;    //A0: OtA Kill Switch 1 - 5VDC out
 const byte pin_OtA_KS_output2 = 15;    //A1: OtA Kill Switch 2 - 5VDC out
-const byte pin_OtA_KS_LED_output = 16;    //A2: OtA Kill Switch LED - 5VDC out
+const byte pin_MUX_Selector_LED_output = 16;    //A2: MUX Selector LED - 5VDC out
 const byte pin_arm_output = 17;    //A3: Arm system - 5VDC out
-const byte pin_selector_output = 18;    //A4: ESC PWM selector DC - 5 VDC out
+const byte pin_selector_output = 18;    //A4: ESC PWM MUX selector DC - 5 VDC out
 const byte pin_RX_timeout_output = 19;    //A5: RX timeout - 5 VDC out
 
 //RX timeout limit
@@ -55,7 +55,7 @@ void setup() {
   //setup output pins
   pinMode(pin_OtA_KS_output1, OUTPUT);
   pinMode(pin_OtA_KS_output2, OUTPUT);
-  pinMode(pin_OtA_KS_LED_output, OUTPUT);
+  pinMode(pin_MUX_Selector_LED_output, OUTPUT);
   pinMode(pin_arm_output, OUTPUT);
   pinMode(pin_selector_output, OUTPUT);
   pinMode(pin_RX_timeout_output, OUTPUT);
@@ -83,7 +83,6 @@ void interrupt_inpD2() {
   // update the outputs
   digitalWrite(pin_OtA_KS_output1, OtA_KS_state);
   digitalWrite(pin_OtA_KS_output2, OtA_KS_state);
-  digitalWrite(pin_OtA_KS_LED_output, OtA_KS_state);
 
 }
 
@@ -99,6 +98,7 @@ ISR (PCINT0_vect){
   pwm_read(pin_MUX_selector_input, rise_inpD8, selector_state);
   // update the output
   digitalWrite(pin_selector_output, selector_state);
+  digitalWrite(pin_MUX_Selector_LED_output, selector_state);
   
 }
 
