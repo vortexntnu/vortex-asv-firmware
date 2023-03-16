@@ -28,7 +28,7 @@ const unsigned long max_wait = 1000000; //1 second
 //declare functions
 void interrupt_inpD2();
 void interrupt_inpD3();
-void pwm_read(byte pin, unsigned long rise_time, bool old_state);
+void pwm_read(byte pin, unsigned long & rise_time, bool & old_state);
 void RX_timeout_check(unsigned long rise_time);
 
 //rising edge - duty cycle start time variables
@@ -45,7 +45,8 @@ bool selector_state = LOW;
 
 void setup() {
   //Serial.begin(9600);
-  
+  //Serial.println("Boot");
+
   //setup input pins
   pinMode(pin_OtA_KS_input, INPUT_PULLUP);
   pinMode(pin_arm_input, INPUT_PULLUP);
@@ -101,8 +102,8 @@ ISR (PCINT0_vect){
   
 }
 
-void pwm_read(byte pin, unsigned long rise_time, bool old_state){
-  //Rising edge
+void pwm_read(byte pin, unsigned long & rise_time, bool & old_state){
+    //Rising edge
   if (digitalRead(pin) == HIGH){
     rise_time = micros();
     return;
@@ -110,6 +111,8 @@ void pwm_read(byte pin, unsigned long rise_time, bool old_state){
   else{
     //Pin low --> Falling edge
     unsigned long duration = micros() - rise_time;
+    //Serial.println(duration);
+    
     if (bttm_lim_DC_HIGH < duration){
       if ( duration < top_lim_DC_HIGH){
         old_state = HIGH;   // turn the output HIGH
@@ -127,6 +130,7 @@ void pwm_read(byte pin, unsigned long rise_time, bool old_state){
 
 void RX_timeout_check(unsigned long rise_time){
   unsigned long wait = micros()-rise_time;
+  
   if (wait>max_wait){
     digitalWrite(pin_RX_timeout_output, LOW);
   }
