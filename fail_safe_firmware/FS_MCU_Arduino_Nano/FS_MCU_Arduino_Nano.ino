@@ -67,6 +67,22 @@ void setup() {
   pinMode(pin_LED_OtA_KS_status_output, OUTPUT);
   pinMode(pin_status_light_R_output, OUTPUT);
 
+  //test LEDs
+  digitalWrite(pin_LED_FS_locked_output, HIGH);
+  digitalWrite(pin_LED_RX_timeout_output, HIGH);
+  digitalWrite(pin_LED_armed_output, HIGH);
+  digitalWrite(pin_LED_SW_KS_status_output, HIGH);
+  digitalWrite(pin_LED_HW_KS_status_output, HIGH);
+  digitalWrite(pin_LED_OtA_KS_status_output, HIGH);
+  delay(1000);
+  digitalWrite(pin_LED_FS_locked_output, LOW);
+  digitalWrite(pin_LED_RX_timeout_output, LOW);
+  digitalWrite(pin_LED_armed_output, LOW);
+  digitalWrite(pin_LED_SW_KS_status_output, LOW);
+  digitalWrite(pin_LED_HW_KS_status_output, LOW);
+  digitalWrite(pin_LED_OtA_KS_status_output, LOW);
+  delay(1000);
+
 }
 
 void loop() {
@@ -78,43 +94,48 @@ void loop() {
     digitalWrite(pin_LED_armed_output,LOW);
     set_main_output(LOW);
   }
-      
+
+  //assume all is well, but check if any tests fail 
+  all_systems_go = true;
+
+  //OtA KS test
+  test_fail_safe_trigger(pin_OtA_KS_input, pin_LED_OtA_KS_status_output);
+  
+  //HW KS test
+  test_fail_safe_trigger(pin_HW_KS_input, pin_LED_HW_KS_status_output);
+  
+  //RX timeout test
+  test_fail_safe_trigger(pin_RX_timeout_input, pin_LED_RX_timeout_output);
+  
+  //SW KS test
+  if (analogRead(pin_SW_KS_input)>analog_logic_high_cutoff){
+    digitalWrite(pin_LED_SW_KS_status_output,HIGH);
+  }
+  else{
+    all_systems_go = false;
+    fail_safe_locked = true;
+    digitalWrite(pin_LED_FS_locked_output,HIGH);
+    set_main_output(LOW);
+    digitalWrite(pin_LED_SW_KS_status_output,LOW);
+  }
+
+
   if (fail_safe_locked){
+    digitalWrite(pin_LED_FS_locked_output,HIGH);
     
     //try to unlock KS
     if (armed){
     }
-    else{
+    else if (all_systems_go){
       fail_safe_locked = false;
       digitalWrite(pin_LED_FS_locked_output,LOW);
+    }
+    else{
     }
   }
   
   //KS not locked
   else{
-    //assume all is well, but check if any tests fail 
-    all_systems_go = true;
-    
-    //OtA KS test
-    test_fail_safe_trigger(pin_OtA_KS_input, pin_LED_OtA_KS_status_output);
-    
-    //HW KS test
-    test_fail_safe_trigger(pin_HW_KS_input, pin_LED_HW_KS_status_output);
-    
-    //RX timeout test
-    test_fail_safe_trigger(pin_RX_timeout_input, pin_LED_RX_timeout_output);
-    
-    //SW KS test
-    if (analogRead(pin_SW_KS_input)>analog_logic_high_cutoff){
-      digitalWrite(pin_LED_SW_KS_status_output,HIGH);
-    }
-    else{
-      all_systems_go = false;
-      fail_safe_locked = true;
-      set_main_output(LOW);
-      digitalWrite(pin_LED_SW_KS_status_output,LOW);
-    }
-    
     if(armed){
       if (all_systems_go){
         set_main_output(HIGH);
@@ -132,14 +153,15 @@ void loop() {
 
 void test_fail_safe_trigger(byte input_pin, byte LED_output_pin){
   if (digitalRead(input_pin)){
-      digitalWrite(LED_output_pin,HIGH);
-    }
-    else{
-      all_systems_go = false;
-      fail_safe_locked = true;
-      set_main_output(LOW);
       digitalWrite(LED_output_pin,LOW);
     }
+  else{
+    all_systems_go = false;
+    fail_safe_locked = true;
+    digitalWrite(pin_LED_FS_locked_output,HIGH);    
+    set_main_output(LOW);
+    digitalWrite(LED_output_pin,HIGH);
+  }
 }
 
 void set_main_output(bool main_output_value){
