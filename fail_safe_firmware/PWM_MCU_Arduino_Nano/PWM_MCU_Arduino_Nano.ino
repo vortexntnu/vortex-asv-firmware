@@ -23,7 +23,7 @@ const byte pin_selector_output = 18;    //A4: ESC PWM MUX selector DC - 5 VDC ou
 const byte pin_RX_timeout_output = 19;    //A5: RX timeout - 5 VDC out
 
 //RX timeout limit
-const unsigned long max_wait = 1000000; //1 second
+const unsigned long max_wait = 5000000; //5 seconds
 
 //declare functions
 void interrupt_inpD2();
@@ -69,6 +69,12 @@ void setup() {
       PCICR |= B00000001;
       //Select PCINT0 Bit0 = 1(Pin D8)
       PCMSK0 |= B00000001;
+
+  //test LEDs
+  digitalWrite(pin_MUX_Selector_LED_output, HIGH);
+  delay(1000);
+  digitalWrite(pin_MUX_Selector_LED_output, LOW);
+  delay(1000);
 }
 
 //Check radio communication integrity. The RX sets all outputs low on signal loss.
