@@ -143,6 +143,7 @@ void receiveMessage(int bytes) {
       Serial.println("Thrusters not armed!");
     }  
   } else {
+    disarm_thrusters();
     Serial.println("Invalid data length received!");
   }
 }
