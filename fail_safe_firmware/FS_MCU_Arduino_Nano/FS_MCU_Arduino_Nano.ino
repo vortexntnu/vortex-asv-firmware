@@ -43,7 +43,8 @@
 
 
 void setup() {
-  //Serial.begin(9600);
+  // Serial.begin(9600);
+  // Serial.println("Boot");
   
   //setup input pins
   pinMode(pin_arm_input, INPUT_PULLUP);
@@ -74,14 +75,14 @@ void setup() {
   digitalWrite(pin_LED_SW_KS_status_output, HIGH);
   digitalWrite(pin_LED_HW_KS_status_output, HIGH);
   digitalWrite(pin_LED_OtA_KS_status_output, HIGH);
-  delay(1000);
+  delay(2000); //2 seconds LED HIGH
   digitalWrite(pin_LED_FS_locked_output, LOW);
   digitalWrite(pin_LED_RX_timeout_output, LOW);
   digitalWrite(pin_LED_armed_output, LOW);
   digitalWrite(pin_LED_SW_KS_status_output, LOW);
   digitalWrite(pin_LED_HW_KS_status_output, LOW);
   digitalWrite(pin_LED_OtA_KS_status_output, LOW);
-  delay(1000);
+  delay(1000); //1 second LED LOW
 
 }
 
@@ -109,14 +110,21 @@ void loop() {
   
   //SW KS test
   if (analogRead(pin_SW_KS_input)>analog_logic_high_cutoff){
-    digitalWrite(pin_LED_SW_KS_status_output,HIGH);
+    digitalWrite(pin_LED_SW_KS_status_output,LOW);
+    // Serial.println("HIGH");
+    // Serial.println(analogRead(pin_SW_KS_input));
+
   }
   else{
+    digitalWrite(pin_LED_SW_KS_status_output,HIGH);
+    
     all_systems_go = false;
     fail_safe_locked = true;
     digitalWrite(pin_LED_FS_locked_output,HIGH);
     set_main_output(LOW);
-    digitalWrite(pin_LED_SW_KS_status_output,LOW);
+    // Serial.println("LOW");
+    // Serial.println(analogRead(pin_SW_KS_input));
+  
   }
 
 
