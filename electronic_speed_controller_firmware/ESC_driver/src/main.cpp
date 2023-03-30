@@ -4,14 +4,10 @@
 #include "failSafe.h"
 
 //Refer to the last 8 rows of the table https://vortex.a2hosted.com/index.php/ASV_Fail_Safe#Teensy_connections_(SW)
-#define HARDWAREKILLSWITCHTRIG_OUT 2
-#define HARDWAREOPERATINGMODE_OUT 3
-#define HARDWAREKILLSWITCHTRIG_IN 4
-#define HARDWAREOPERATINGMODE_IN 5
-#define SOFTWAREKILLSWITCHTRIG_OUT 20
-#define SOFTWAREOPERATINGMODE_OUT 21
-#define SOFTWAREKILLSWITCHTRIG_IN 22
-#define SOFTWAREOPERATINGMODE_IN 23
+#define HARDWAREKILLSWITCHTRIG 2
+#define SOFTWAREKILLSWITCHTRIG 3
+#define SOFTWAREOPERATINGMODE 4
+#define HARDWAREOPERATINGMODE 5
 
 #define ESC_PIN1 28
 #define ESC_PIN2 29
@@ -79,9 +75,9 @@ void loop() {
     0: Hardware operation mode
     1: Software operation mode
     */
-    int operationMode = operatingModeStatus(HARDWAREOPERATINGMODE_IN, HARDWAREOPERATINGMODE_OUT, SOFTWAREOPERATINGMODE_IN, SOFTWAREOPERATINGMODE_OUT);
+    int operationMode = operatingModeStatus(HARDWAREKILLSWITCHTRIG, SOFTWAREKILLSWITCHTRIG);
 
-    bool failsafeTriggered = failSafeStatus(HARDWAREKILLSWITCHTRIG_IN, HARDWAREKILLSWITCHTRIG_OUT, SOFTWAREKILLSWITCHTRIG_IN, SOFTWAREKILLSWITCHTRIG_OUT);
+    bool failsafeTriggered = failSafeStatus(SOFTWAREOPERATINGMODE, HARDWAREOPERATINGMODE);
     
     if (isArmed && (failsafeTriggered || operationMode != 1)) {
       Serial.println("Disarming!!!");
