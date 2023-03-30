@@ -77,7 +77,7 @@ void loop() {
     */
     int operationMode = operatingModeStatus(HARDWAREKILLSWITCHTRIG, SOFTWAREKILLSWITCHTRIG);
 
-    bool failsafeTriggered = failSafeStatus(SOFTWAREOPERATINGMODE, HARDWAREOPERATINGMODE);
+    bool failsafeTriggered = failSafeStatus(HARDWAREOPERATINGMODE, SOFTWAREOPERATINGMODE);
     
     if (isArmed && (failsafeTriggered || operationMode != 1)) {
       Serial.println("Disarming!!!");
