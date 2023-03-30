@@ -24,8 +24,7 @@ int operatingModeStatus(int hardOpModeIn, int hardOpModeOut, int softOpModeIn, i
   /*
   -1: ERROR
   
-  0: Hardware operation mode
-  1: Software operation mode
+	@@ -29,21 +26,13 @@ int operatingModeStatus(int hardOpModeIn, int hardOpModeOut, int softOpModeIn, i
   */
   int operationMode = -1;
 
