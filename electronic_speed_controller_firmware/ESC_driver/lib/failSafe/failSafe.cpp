@@ -1,26 +1,23 @@
 #include <failSafe.h>
 
-bool failSafeStatus(int failSafeIn,int failSafeOut, int softKillIn, int softKillOut){
+bool failSafeStatus(int HARDWAREKILLSWITCHTRIG, int SOFTWAREKILLSWITCHTRIG){
   bool failsafeTriggered = false;
 
   /*
   As per specification, if and only if both software and hardware fail signals safe are high, 
   are the outputs high, otherwise both are low
   */
-  if(digitalRead(failSafeIn) == HIGH && digitalRead(softKillIn) == HIGH){ 
-    digitalWrite(failSafeOut, HIGH);
-    digitalWrite(softKillOut, HIGH);
-  }
-  else{
+  if(digitalRead(HARDWAREKILLSWITCHTRIG) == LOW) {
     failsafeTriggered = true;
-    digitalWrite(failSafeOut, LOW);
-    digitalWrite(softKillOut, LOW);
+  }
+  if(digitalRead(SOFTWAREKILLSWITCHTRIG) == LOW) {
+    failsafeTriggered = true;
   }
 
   return failsafeTriggered;
 }
 
-int operatingModeStatus(int hardOpModeIn, int hardOpModeOut, int softOpModeIn, int softOpModeOut){
+int operatingModeStatus(int HARDWAREOPERATINGMODE, int SOFTWAREOPERATINGMODE){
   /*
   -1: ERROR
   
@@ -29,20 +26,12 @@ int operatingModeStatus(int hardOpModeIn, int hardOpModeOut, int softOpModeIn, i
   */
   int operationMode = -1;
 
-  if(digitalRead(softOpModeIn) == HIGH){
-    digitalWrite(softOpModeOut, HIGH);
+  if(digitalRead(SOFTWAREOPERATINGMODE) == HIGH){
     operationMode = 1;
   }
-  else{
-    digitalWrite(softOpModeOut, LOW);
-  }
 
-  if(digitalRead(hardOpModeIn) == HIGH){
-    digitalWrite(hardOpModeOut, HIGH);
+  if(digitalRead(HARDWAREOPERATINGMODE) == HIGH){
     operationMode = 0;
-  }
-  else{
-    digitalWrite(hardOpModeOut, LOW);
   }
 
   return operationMode;
