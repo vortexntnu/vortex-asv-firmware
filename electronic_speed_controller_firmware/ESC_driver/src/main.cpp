@@ -6,8 +6,11 @@
 //Refer to the last 8 rows of the table https://vortex.a2hosted.com/index.php/ASV_Fail_Safe#Teensy_connections_(SW)
 #define HARDWAREKILLSWITCHTRIG 23
 #define SOFTWAREKILLSWITCHTRIG 22
-#define SOFTWAREOPERATINGMODE 21
 #define HARDWAREOPERATINGMODE 20
+
+// DELETE THIS (START) ==================================================
+#define SOFTWAREOPERATINGMODE 21 // Unecessary pin, Teensy doesnt need to know Software mode because it just need to know PWM signal, no matter the mode it will just go with the PWM signal
+// DELETE THIS (STOP) ==================================================
 
 #define ESC_PIN1 28
 #define ESC_PIN2 29
@@ -70,11 +73,11 @@ void loop() {
     0: Hardware operation mode
     1: Software operation mode
     */
-    int operationMode = operatingModeStatus(HARDWAREKILLSWITCHTRIG, SOFTWAREKILLSWITCHTRIG);
+    int operationMode = operatingModeStatus(HARDWAREOPERATINGMODE);
 
-    bool failsafeTriggered = failSafeStatus(HARDWAREOPERATINGMODE, SOFTWAREOPERATINGMODE);
+    bool failsafeTriggered = failSafeStatus(HARDWAREKILLSWITCHTRIG, SOFTWAREKILLSWITCHTRIG);
     
-    if (isArmed && (failsafeTriggered || operationMode != 1)) {
+    if (isArmed && (failsafeTriggered || operationMode == -1 || operationMode == 0)) {
       Serial.println("Disarming!!!");
       disarm_thrusters();
     }
@@ -84,6 +87,13 @@ void loop() {
     }
 
     failsafeTimerLastCheck = millis();
+    Serial.print("HK (23): ");Serial.print(digitalRead(HARDWAREKILLSWITCHTRIG));
+    Serial.print("  |  SK (22): ");Serial.print(digitalRead(SOFTWAREKILLSWITCHTRIG));
+    Serial.print("  |  SM (21): ");Serial.print(digitalRead(SOFTWAREOPERATINGMODE));
+    Serial.print("  |  HM (20): ");Serial.print(digitalRead(HARDWAREOPERATINGMODE));
+    Serial.print("  |  Mode: ");Serial.print(operationMode);
+    Serial.print("  |  FailsafeTRIG?: ");Serial.print(failsafeTriggered);
+    Serial.println();
   }
 }
 

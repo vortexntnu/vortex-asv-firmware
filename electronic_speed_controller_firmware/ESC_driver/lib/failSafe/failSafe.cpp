@@ -4,31 +4,31 @@ bool failSafeStatus(int HARDWAREKILLSWITCHTRIG, int SOFTWAREKILLSWITCHTRIG){
   bool failsafeTriggered = false;
 
   /*
-  As per specification, if and only if both software and hardware fail signals safe are high, 
-  are the outputs high, otherwise both are low
+  As per specification, if and only if both software and hardware fail signals safe are high
   */
-  if (digitalRead(HARDWAREKILLSWITCHTRIG) == HIGH) { 
+  if (digitalRead(HARDWAREKILLSWITCHTRIG) == LOW) { 
     failsafeTriggered = true;
   }
-  else if (digitalRead(SOFTWAREKILLSWITCHTRIG) == HIGH){
+  if (digitalRead(SOFTWAREKILLSWITCHTRIG) == LOW) {
     failsafeTriggered = true;
   }
 
   return failsafeTriggered;
 }
 
-int operatingModeStatus(int SOFTWAREOPERATINGMODE, int HARDWAREOPERATINGMODE){
+int operatingModeStatus(int HARDWAREOPERATINGMODE){
   /*
   -1: ERROR
   
-	@@ -29,21 +26,13 @@ int operatingModeStatus(int hardOpModeIn, int hardOpModeOut, int softOpModeIn, i
+  0: Hardware operation mode
+  1: Software operation mode
   */
   int operationMode = -1;
 
-  if(digitalRead(HARDWAREOPERATINGMODE) == HIGH){
+  if (digitalRead(HARDWAREOPERATINGMODE) == LOW) {
     operationMode = 0;
   }
-  else if(digitalRead(SOFTWAREOPERATINGMODE) == HIGH){
+  if (digitalRead(HARDWAREOPERATINGMODE) == HIGH) {
     operationMode = 1;
   }
 
