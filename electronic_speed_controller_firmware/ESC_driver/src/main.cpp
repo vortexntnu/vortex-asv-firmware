@@ -4,14 +4,13 @@
 #include "failSafe.h"
 
 //Refer to the last 8 rows of the table https://vortex.a2hosted.com/index.php/ASV_Fail_Safe#Teensy_connections_(SW)
-#define HARDWAREKILLSWITCHTRIG_OUT 2
-#define HARDWAREOPERATINGMODE_OUT 3
-#define HARDWAREKILLSWITCHTRIG_IN 4
-#define HARDWAREOPERATINGMODE_IN 5
-#define SOFTWAREKILLSWITCHTRIG_OUT 20
-#define SOFTWAREOPERATINGMODE_OUT 21
-#define SOFTWAREKILLSWITCHTRIG_IN 22
-#define SOFTWAREOPERATINGMODE_IN 23
+#define HARDWAREKILLSWITCHTRIG 23
+#define SOFTWAREKILLSWITCHTRIG 22
+#define HARDWAREOPERATINGMODE 20
+
+// DELETE THIS (START) ==================================================
+#define SOFTWAREOPERATINGMODE 21 // Unecessary pin, Teensy doesnt need to know Software mode because it just need to know PWM signal, no matter the mode it will just go with the PWM signal
+// DELETE THIS (STOP) ==================================================
 
 #define ESC_PIN1 28
 #define ESC_PIN2 29
@@ -44,15 +43,10 @@ void setup() {
   delay(5000);
 
   Serial.println("Configuring failsafe pins...");
-  pinMode(HARDWAREKILLSWITCHTRIG_IN, INPUT);
-  pinMode(SOFTWAREKILLSWITCHTRIG_IN, INPUT);
-  pinMode(HARDWAREOPERATINGMODE_IN, INPUT);
-  pinMode(SOFTWAREOPERATINGMODE_IN, INPUT);
-
-  pinMode(HARDWAREKILLSWITCHTRIG_OUT, OUTPUT);
-  pinMode(SOFTWAREKILLSWITCHTRIG_OUT, OUTPUT);
-  pinMode(HARDWAREOPERATINGMODE_OUT, OUTPUT);
-  pinMode(SOFTWAREOPERATINGMODE_OUT, OUTPUT);
+  pinMode(HARDWAREKILLSWITCHTRIG, INPUT);
+  pinMode(SOFTWAREKILLSWITCHTRIG, INPUT);
+  pinMode(SOFTWAREOPERATINGMODE, INPUT);
+  pinMode(HARDWAREOPERATINGMODE, INPUT);
 
   Serial.println("Configuring ESCs...");
   ESC1.attach(ESC_PIN1);
@@ -79,11 +73,11 @@ void loop() {
     0: Hardware operation mode
     1: Software operation mode
     */
-    int operationMode = operatingModeStatus(HARDWAREOPERATINGMODE_IN, HARDWAREOPERATINGMODE_OUT, SOFTWAREOPERATINGMODE_IN, SOFTWAREOPERATINGMODE_OUT);
+    int operationMode = operatingModeStatus(HARDWAREOPERATINGMODE);
 
-    bool failsafeTriggered = failSafeStatus(HARDWAREKILLSWITCHTRIG_IN, HARDWAREKILLSWITCHTRIG_OUT, SOFTWAREKILLSWITCHTRIG_IN, SOFTWAREKILLSWITCHTRIG_OUT);
+    bool failsafeTriggered = failSafeStatus(HARDWAREKILLSWITCHTRIG, SOFTWAREKILLSWITCHTRIG);
     
-    if (isArmed && (failsafeTriggered || operationMode != 1)) {
+    if (isArmed && (failsafeTriggered || operationMode == -1 || operationMode == 0)) {
       Serial.println("Disarming!!!");
       disarm_thrusters();
     }
@@ -93,6 +87,13 @@ void loop() {
     }
 
     failsafeTimerLastCheck = millis();
+    Serial.print("HK (23): ");Serial.print(digitalRead(HARDWAREKILLSWITCHTRIG));
+    Serial.print("  |  SK (22): ");Serial.print(digitalRead(SOFTWAREKILLSWITCHTRIG));
+    Serial.print("  |  SM (21): ");Serial.print(digitalRead(SOFTWAREOPERATINGMODE));
+    Serial.print("  |  HM (20): ");Serial.print(digitalRead(HARDWAREOPERATINGMODE));
+    Serial.print("  |  Mode: ");Serial.print(operationMode);
+    Serial.print("  |  FailsafeTRIG?: ");Serial.print(failsafeTriggered);
+    Serial.println();
   }
 }
 

@@ -1,5 +1,5 @@
 #include <Arduino.h>
 
-bool failSafeStatus(int failSafeIn,int failSafeOut, int softKillIn, int softKillOut);
+bool failSafeStatus(int HARDWAREKILLSWITCHTRIG, int SOFTWAREKILLSWITCHTRIG);
 
-int operatingModeStatus(int hardOpModeIn, int hardOpModeOut, int softOpModeIn, int softOpModeOut);
+int operatingModeStatus(int HARDWAREOPERATINGMODE);
