@@ -106,13 +106,13 @@ void loop() {
     
     //SW KS test
     if (analogRead(pin_SW_KS_input)>analog_logic_high_cutoff){
-      digitalWrite(pin_LED_SW_KS_status_output,HIGH);
+      digitalWrite(pin_LED_SW_KS_status_output,LOW);
     }
     else{
       all_systems_go = false;
       fail_safe_locked = true;
       set_main_output(LOW);
-      digitalWrite(pin_LED_SW_KS_status_output,LOW);
+      digitalWrite(pin_LED_SW_KS_status_output,HIGH);
     }
     
     if(armed){
@@ -132,13 +132,13 @@ void loop() {
 
 void test_fail_safe_trigger(byte input_pin, byte LED_output_pin){
   if (digitalRead(input_pin)){
-      digitalWrite(LED_output_pin,HIGH);
+      digitalWrite(LED_output_pin,LOW);
     }
     else{
       all_systems_go = false;
       fail_safe_locked = true;
       set_main_output(LOW);
-      digitalWrite(LED_output_pin,LOW);
+      digitalWrite(LED_output_pin,HIGH);
     }
 }
 
