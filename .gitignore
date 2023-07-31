@@ -50,3 +50,15 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Gattlib ignores
+bms-jbdtools/gattlib/build
+bms-jbdtools/gattlib/__pycache__
+
+# paho.mqtt.c ignores
+bms-jbdtools/paho.mqtt.c/dep/
+bms-jbdtools/paho.mqtt.c/build/
+bms-jbdtools/paho.mqtt.c/build.paho/
+bms-jbdtools/paho.mqtt.c/*.swp
+bms-jbdtools/paho.mqtt.c/*.pyc
+bms-jbdtools/paho.mqtt.c/build.paho
