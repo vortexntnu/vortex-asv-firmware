@@ -36,3 +36,13 @@ Check which usb port its connected to:
 Go to the jbdtool folder (It takes sometime before a response is printed):
 
     sudo ./jbdtool -t serial:/dev/ttyUSB0
+
+# Permission Error
+If you get this error when running the command above without sudo, there is a unsafe, but gets it working command:
+    
+    error: lock_file: open(/tmp/ttyUSB2.lock): Permission denied
+    error: unable to lock target
+
+Choose the relevant ttyUSBX and write (NB! it might be somewhat unsafe, but its 0:30am so don't care)
+
+    sudo chmod 666 /tmp/ttyUSBX.lock
