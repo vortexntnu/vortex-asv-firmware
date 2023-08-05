@@ -157,12 +157,13 @@ void loop() {
     
     //try to unlock KS
     if (armed){
+      all_systems_go = false; //neccessary for status light to be "red" colour
     }
     else if (all_systems_go){
       fail_safe_locked = false;
       digitalWrite(pin_LED_FS_locked_output,LOW);
     }
-    else{
+  else{
     }
   }
   
@@ -204,7 +205,7 @@ void set_main_output(bool main_output_value){
 
 void status_lights(){
   //Set pins to control the status light indicating ASV operation mode. Reference the Vortex Wiki for more info.
-  if (all_systems_go){
+  if (all_systems_go && armed){
     if(digitalRead(pin_RX_operation_mode_input)){
       //Manual
       set_RGBY(LOW,LOW,LOW,HIGH);
@@ -212,15 +213,37 @@ void status_lights(){
     else{
       //SW controlled
       if (analogRead(pin_SW_operation_mode_input)>analog_logic_high_cutoff){
-        //Software manual control
+        //Software manual control (solid yellow)
         set_RGBY(LOW,LOW,LOW,HIGH);
       }
       else{
-        //Autonomous
+        //Autonomous (solid green)
         set_RGBY(LOW, HIGH, LOW, LOW);
       }
     }
   }
+  else if (all_systems_go && !armed){
+    //awaiting arming - (Red-flash)
+    set_RGBY(HIGH, HIGH, LOW, LOW); //remove this line?
+
+    if(digitalRead(pin_RX_operation_mode_input)){
+      //Manual - unarmed (yellow-red flash)
+      set_RGBY(HIGH,LOW,HIGH,HIGH);
+    }
+    else{
+      //SW controlled - unarmed (yellow-red flash)
+      if (analogRead(pin_SW_operation_mode_input)>analog_logic_high_cutoff){
+        //Software manual control unarmed (yellow-red flash)
+        set_RGBY(HIGH,LOW,HIGH,HIGH);
+      }
+      else{
+        //Autonomous - unarmed (green-red flash)
+        set_RGBY(LOW, HIGH, HIGH, LOW);
+      }
+    }
+
+  }
+  
   else{
     //KS triggered
     set_RGBY(HIGH, LOW, LOW, LOW); 
