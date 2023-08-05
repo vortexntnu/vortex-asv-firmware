@@ -1,0 +1,4 @@
+This is a bootleg solution for driving electric speed control units on asv
+The reason for bootleg solution is because of 5 august 2023 the Failsafe board is broken and not working
+So instead we get commands from RPI through I2C on our "bootleg solution ARduino". Arduino then directly sends data to the ESC and drives the thrusters. This code and Arduino doesn't have any failsafe precautions or anything of that matter. If something fails the RPI has to send a specific I2C sequence to stop the thrusters spinning
+As everyone knows, handling errors in software instead of hardware is not reliable and might cause issues, but this is better than NOT having any thrusters drive at all X)
