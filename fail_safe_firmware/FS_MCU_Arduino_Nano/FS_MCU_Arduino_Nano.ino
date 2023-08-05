@@ -68,7 +68,7 @@ void setup() {
   pinMode(pin_LED_OtA_KS_status_output, OUTPUT);
   pinMode(pin_status_light_R_output, OUTPUT);
 
-  //test LEDs
+  //test FS-PCB-LEDs
   digitalWrite(pin_LED_FS_locked_output, HIGH);
   digitalWrite(pin_LED_RX_timeout_output, HIGH);
   digitalWrite(pin_LED_armed_output, HIGH);
@@ -76,6 +76,7 @@ void setup() {
   digitalWrite(pin_LED_HW_KS_status_output, HIGH);
   digitalWrite(pin_LED_OtA_KS_status_output, HIGH);
   delay(2000); //2 seconds LED HIGH
+
   digitalWrite(pin_LED_FS_locked_output, LOW);
   digitalWrite(pin_LED_RX_timeout_output, LOW);
   digitalWrite(pin_LED_armed_output, LOW);
@@ -84,6 +85,29 @@ void setup() {
   digitalWrite(pin_LED_OtA_KS_status_output, LOW);
   delay(1000); //1 second LED LOW
 
+  //test 24V-Status-Light
+  set_RGBY(HIGH, HIGH, HIGH, HIGH);
+  delay(4000); //4 second LED blinking all 4 colours: "Green -> Red -> Yellow -> Blue"-flash cycle
+  
+  set_RGBY(LOW, LOW, LOW, LOW);
+  delay(2000); //1 Second black pause
+  
+  set_RGBY(HIGH, LOW, LOW, LOW);
+  delay(2000); //2 Second solid "Red"
+
+  set_RGBY(LOW, HIGH, LOW, LOW);
+  delay(2000); //2 Second solid "Green"
+
+  set_RGBY(LOW, LOW, HIGH, LOW);
+  delay(2000); //2 Second solid "Blue"
+
+  set_RGBY(LOW, LOW, LOW, HIGH);
+  delay(2000); //2 Second solid "Yellow"
+
+  set_RGBY(LOW, LOW, LOW, LOW);
+  delay(1000); //1 Second black pause
+
+  //Setup finished
 }
 
 void loop() {
