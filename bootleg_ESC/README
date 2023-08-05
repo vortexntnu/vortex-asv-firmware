@@ -1,0 +1,21 @@
+This is a bootleg solution for driving electric speed control units on asv
+The reason for bootleg solution is because of 5 august 2023 the Failsafe board is broken and not working
+So instead we get commands from RPI through I2C on our "bootleg solution ARduino". Arduino then directly sends data to the ESC and drives the thrusters. This code and Arduino doesn't have any failsafe precautions or anything of that matter. If something fails the RPI has to send a specific I2C sequence to stop the thrusters spinning
+As everyone knows, handling errors in software instead of hardware is not reliable and might cause issues, but this is better than NOT having any thrusters drive at all X)
+
+Expected input:
+A input from I2C
+Arduino Address: 0x21
+Data type: 
+    - A value from 1100 to 1900 for all 4 thrusters, so a list of 4 elements
+    - Since I2C data packages are only 8 bits long and 1900 is 11 bits we must split the package in 2 parts (MSP and LSP, least and most significant parts)
+    - So in total I2C must send to Arduino 8 packages in total like this
+    - [MSP1, LSP1, MSP2, LSP2, MSP3, LSP3, MSP4, LSP4]
+    - This in turn will be internally combined in Arduino as a list of 4 elements from 1100 to 1900 values
+
+Output:
+A PWM signal from arduino PWM pins
+ESC 1 -> Arduino PIN 11
+ESC 2 -> Arduino PIN 10
+ESC 3 -> Arduino PIN 9
+ESC 4 -> Arduino PIN 6
