@@ -1,4 +1,22 @@
+
+//DO NOT USE, unresolved underflow error triggers RX timeout
+//DO NOT USE, unresolved underflow error triggers RX timeout
+//DO NOT USE, unresolved underflow error triggers RX timeout
+//DO NOT USE, unresolved underflow error triggers RX timeout
+//DO NOT USE, unresolved underflow error triggers RX timeout
+//DO NOT USE, unresolved underflow error triggers RX timeout
+//DO NOT USE, unresolved underflow error triggers RX timeout
+//DO NOT USE, unresolved underflow error triggers RX timeout
+//DO NOT USE, unresolved underflow error triggers RX timeout
+//DO NOT USE, unresolved underflow error triggers RX timeout
+//DO NOT USE, unresolved underflow error triggers RX timeout
+//DO NOT USE, unresolved underflow error triggers RX timeout
+//DO NOT USE, unresolved underflow error triggers RX timeout
+//DO NOT USE, unresolved underflow error triggers RX timeout
+
 //This firmware is used on an Arduino Nano, to interpret 50Hz RC PWM signals from a FrSky Radio Reciever and relay those to the Fail Safe MCU.
+
+
 
 //ATTENTION: Do not upload while sending PWM signals to pins, this causes errors and results in an aborted upload. (This is presumably caused by hardware interrupts halting upload while triggered.)
 
