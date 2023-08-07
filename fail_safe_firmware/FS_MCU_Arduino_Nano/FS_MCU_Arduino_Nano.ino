@@ -214,7 +214,7 @@ void status_lights(){
       //SW controlled
       if (analogRead(pin_SW_operation_mode_input)>analog_logic_high_cutoff){
         //Software manual control (solid yellow)
-        set_RGBY(LOW,LOW,LOW,HIGH);
+        set_RGBY(LOW,HIGH,LOW,LOW); //change to 0,0,0,1 if using proper SW mode
       }
       else{
         //Autonomous (solid green)
@@ -223,8 +223,6 @@ void status_lights(){
     }
   }
   else if (all_systems_go && !armed){
-    //awaiting arming - (Red-flash)
-    set_RGBY(HIGH, HIGH, LOW, LOW); //remove this line?
 
     if(digitalRead(pin_RX_operation_mode_input)){
       //Manual - unarmed (yellow-red flash)
@@ -234,7 +232,7 @@ void status_lights(){
       //SW controlled - unarmed (yellow-red flash)
       if (analogRead(pin_SW_operation_mode_input)>analog_logic_high_cutoff){
         //Software manual control unarmed (yellow-red flash)
-        set_RGBY(HIGH,LOW,HIGH,HIGH);
+        set_RGBY(LOW,HIGH,HIGH,LOW); //change to 1,0,1,1 if using proper SW mode
       }
       else{
         //Autonomous - unarmed (green-red flash)
@@ -251,8 +249,9 @@ void status_lights(){
 }
 
 void set_RGBY(bool R, bool G, bool B, bool Y){
-  digitalWrite(pin_status_light_R_output, R);    //RED status pin 
-  digitalWrite(pin_status_light_G_output, G);    //GREEN status pin 
-  digitalWrite(pin_status_light_B_output, B);    //BLUE status pin 
-  digitalWrite(pin_status_light_Y_output, Y);    //YELLOW status pin
+  //due to incorrectly selected Mosfet, states are inverted
+  digitalWrite(pin_status_light_R_output, !R);    //RED status pin 
+  digitalWrite(pin_status_light_G_output, !G);    //GREEN status pin 
+  digitalWrite(pin_status_light_B_output, !B);    //BLUE status pin 
+  digitalWrite(pin_status_light_Y_output, !Y);    //YELLOW status pin
 }
