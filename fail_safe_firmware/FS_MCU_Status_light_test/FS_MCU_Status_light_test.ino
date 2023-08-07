@@ -87,18 +87,20 @@ void setup() {
 }
 
 void loop() {
-  set_RGBY(0,0,0,1);
+  set_RGBY(LOW,LOW,LOW,LOW);
   delay(2000);
-  set_RGBY(0,0,1,0);
+  set_RGBY(LOW,LOW,LOW,LOW);
+  delay(20000);
+  set_RGBY(LOW,LOW,HIGH,LOW);
   delay(2000);
-  set_RGBY(0,1,0,0);
+  set_RGBY(LOW,HIGH,LOW,LOW);
   delay(2000);
-  set_RGBY(1,0,0,0);
+  set_RGBY(HIGH,LOW,LOW,LOW);
+  delay(20000);
+  set_RGBY(LOW,LOW,LOW,LOW);
   delay(2000);
-  set_RGBY(0,0,0,0);
-  delay(5000);
   while(true){
-    set_RGBY(1,1,1,1);
+    set_RGBY(HIGH,HIGH,HIGH,HIGH);
     delay(1000);
   }
 }
@@ -107,8 +109,9 @@ void loop() {
 
 
 void set_RGBY(bool R, bool G, bool B, bool Y){
-  digitalWrite(pin_status_light_R_output, R);    //RED status pin 
-  digitalWrite(pin_status_light_G_output, G);    //GREEN status pin 
-  digitalWrite(pin_status_light_B_output, B);    //BLUE status pin 
-  digitalWrite(pin_status_light_Y_output, Y);    //YELLOW status pin
+  //states are inverted due to incorrectly selected mosfet
+  digitalWrite(pin_status_light_R_output, !R);    //RED status pin 
+  digitalWrite(pin_status_light_G_output, !G);    //GREEN status pin 
+  digitalWrite(pin_status_light_B_output, !B);    //BLUE status pin 
+  digitalWrite(pin_status_light_Y_output, !Y);    //YELLOW status pin
 }
