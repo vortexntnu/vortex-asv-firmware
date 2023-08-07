@@ -1,22 +1,4 @@
-
-//DO NOT USE, unresolved underflow error triggers RX timeout
-//DO NOT USE, unresolved underflow error triggers RX timeout
-//DO NOT USE, unresolved underflow error triggers RX timeout
-//DO NOT USE, unresolved underflow error triggers RX timeout
-//DO NOT USE, unresolved underflow error triggers RX timeout
-//DO NOT USE, unresolved underflow error triggers RX timeout
-//DO NOT USE, unresolved underflow error triggers RX timeout
-//DO NOT USE, unresolved underflow error triggers RX timeout
-//DO NOT USE, unresolved underflow error triggers RX timeout
-//DO NOT USE, unresolved underflow error triggers RX timeout
-//DO NOT USE, unresolved underflow error triggers RX timeout
-//DO NOT USE, unresolved underflow error triggers RX timeout
-//DO NOT USE, unresolved underflow error triggers RX timeout
-//DO NOT USE, unresolved underflow error triggers RX timeout
-
 //This firmware is used on an Arduino Nano, to interpret 50Hz RC PWM signals from a FrSky Radio Reciever and relay those to the Fail Safe MCU.
-
-
 
 //ATTENTION: Do not upload while sending PWM signals to pins, this causes errors and results in an aborted upload. (This is presumably caused by hardware interrupts halting upload while triggered.)
 
@@ -41,7 +23,7 @@ const byte pin_selector_output = 18;    //A4: ESC PWM MUX selector DC - 5 VDC ou
 const byte pin_RX_timeout_output = 19;    //A5: RX timeout - 5 VDC out
 
 //RX timeout limit
-const unsigned long max_wait = 5000000; //5 seconds
+const unsigned long max_wait = 30000000; //30 seconds
 
 //declare functions
 void interrupt_inpD2();
@@ -54,6 +36,9 @@ unsigned long rise_inpD2;
 unsigned long rise_inpD3;
 unsigned long rise_inpD8;
 
+//RX timeout
+unsigned long wait_time;
+
 //output state storage
 bool OtA_KS_state = LOW;
 bool arm_state = LOW;
@@ -62,8 +47,8 @@ bool selector_state = LOW;
 
 
 void setup() {
-  //Serial.begin(9600);
-  //Serial.println("Boot");
+  // Serial.begin(9600);
+  // Serial.println("Boot");
 
   //setup input pins
   pinMode(pin_OtA_KS_input, INPUT_PULLUP);
@@ -89,17 +74,41 @@ void setup() {
       PCMSK0 |= B00000001;
 
   //test LEDs
+  delay(1400); //1.4 second sync LED delay
   digitalWrite(pin_MUX_Selector_LED_output, HIGH);
-  delay(1000);
+  delay(2000); //2 seconds LED HIGH
   digitalWrite(pin_MUX_Selector_LED_output, LOW);
-  delay(1000);
+  delay(1000);//1 second LED HIGH
 }
 
 //Check radio communication integrity. The RX sets all outputs low on signal loss.
 void loop() {
-  RX_timeout_check(rise_inpD2);
-  RX_timeout_check(rise_inpD3);
-  RX_timeout_check(rise_inpD8);
+  unsigned long wait = micros()-wait_time;
+  if (wait>micros()){
+    wait=0;
+  }
+
+  if (wait>max_wait){
+    // Serial.println(wait);
+    // Serial.println("^ Wait");
+    // Serial.print("max wait: ");
+    // Serial.println(max_wait);
+    // Serial.print("micros: ");
+    // Serial.println(micros());
+    // Serial.print("wait_time: ");
+    // Serial.println(wait_time);
+    // Serial.print("max int: ");
+    // unsigned long a = -1;
+    // Serial.println(a);
+    
+    // delay(10000000);
+    if (wait>max_wait){
+      digitalWrite(pin_RX_timeout_output, LOW);
+    }
+  }
+  else{    
+    digitalWrite(pin_RX_timeout_output, HIGH);    
+  }
 }
 
 void interrupt_inpD2() {
@@ -107,6 +116,7 @@ void interrupt_inpD2() {
   // update the outputs
   digitalWrite(pin_OtA_KS_output1, OtA_KS_state);
   digitalWrite(pin_OtA_KS_output2, OtA_KS_state);
+  // Serial.println("trigg\n");
 
 }
 
@@ -130,6 +140,7 @@ void pwm_read(byte pin, unsigned long & rise_time, bool & old_state){
     //Rising edge
   if (digitalRead(pin) == HIGH){
     rise_time = micros();
+    wait_time = micros();
     return;
   }
   else{
@@ -152,13 +163,3 @@ void pwm_read(byte pin, unsigned long & rise_time, bool & old_state){
   }
 }
 
-void RX_timeout_check(unsigned long rise_time){
-  unsigned long wait = micros()-rise_time;
-  
-  if (wait>max_wait){
-    digitalWrite(pin_RX_timeout_output, LOW);
-  }
-  else{
-    digitalWrite(pin_RX_timeout_output, HIGH);
-  }
-}
