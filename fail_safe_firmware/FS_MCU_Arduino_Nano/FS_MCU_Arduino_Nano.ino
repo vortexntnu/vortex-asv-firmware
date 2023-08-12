@@ -15,7 +15,6 @@ void setup() {
   pinMode(pin_OtA_KS_input, INPUT_PULLUP);
   pinMode(pin_HW_KS_input, INPUT_PULLUP);
   pinMode(pin_RX_timeout_input, INPUT_PULLUP);
-
   pinMode(pin_RX_operation_mode_input, INPUT_PULLUP);
 
   //setup output pins
@@ -176,13 +175,13 @@ void status_lights(){
   if (all_systems_go && armed){
     if(digitalRead(pin_RX_operation_mode_input)){
       //Manual
-      set_RGBY(LOW,LOW,LOW,HIGH);
+      set_RGBY(LOW,LOW,HIGH,LOW); //use LOW,LOW,LOW,HIGH for competition
     }
     else{
       //SW controlled
       if (analogRead(pin_SW_operation_mode_input)>analog_logic_high_cutoff){
         //Software manual control (solid yellow)
-        set_RGBY(LOW,HIGH,LOW,LOW); //change to 0,0,0,1 if using proper SW mode
+        set_RGBY(LOW,LOW,LOW,HIGH); //change to LOW,HIGH,LOW,LOW if using simplified SW mode
       }
       else{
         //Autonomous (solid green)
@@ -194,13 +193,13 @@ void status_lights(){
 
     if(digitalRead(pin_RX_operation_mode_input)){
       //Manual - unarmed (yellow-red flash)
-      set_RGBY(HIGH,LOW,HIGH,HIGH);
+      set_RGBY(HIGH,LOW,HIGH,LOW); //use HIGH,LOW,HIGH,HIGH for competition 
     }
     else{
       //SW controlled - unarmed (yellow-red flash)
       if (analogRead(pin_SW_operation_mode_input)>analog_logic_high_cutoff){
         //Software manual control unarmed (yellow-red flash)
-        set_RGBY(LOW,HIGH,HIGH,LOW); //change to 1,0,1,1 if using proper SW mode
+        set_RGBY(HIGH,LOW,HIGH,HIGH); //change to LOW,HIGH,HIGH,LOW if using simplified SW mode
       }
       else{
         //Autonomous - unarmed (green-red flash)
