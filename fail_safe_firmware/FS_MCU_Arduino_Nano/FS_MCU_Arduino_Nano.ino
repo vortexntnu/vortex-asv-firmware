@@ -193,7 +193,7 @@ void status_lights(){
 
     if(digitalRead(pin_RX_operation_mode_input)){
       //Manual - unarmed (yellow-red flash)
-      set_RGBY(HIGH,LOW,HIGH,LOW); //use HIGH,LOW,HIGH,HIGH for competition 
+      set_RGBY(LOW,LOW,HIGH,HIGH); //use HIGH,LOW,HIGH,HIGH for competition 
     }
     else{
       //SW controlled - unarmed (yellow-red flash)
