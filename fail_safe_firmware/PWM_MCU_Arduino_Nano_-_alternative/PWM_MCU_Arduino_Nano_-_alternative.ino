@@ -131,8 +131,8 @@ ISR (PCINT0_vect){
   // Interrupt for Port B
   pwm_read(pin_MUX_selector_input, rise_inpD8, selector_state);
   // update the output
-  digitalWrite(pin_selector_output, selector_state);
-  digitalWrite(pin_MUX_Selector_LED_output, selector_state);
+  digitalWrite(pin_selector_output, !selector_state);
+  digitalWrite(pin_MUX_Selector_LED_output, !selector_state);
   
 }
 

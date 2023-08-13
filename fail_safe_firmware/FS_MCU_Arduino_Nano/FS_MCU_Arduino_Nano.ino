@@ -173,7 +173,7 @@ void set_main_output(bool main_output_value){
 void status_lights(){
   //Set pins to control the status light indicating ASV operation mode. Reference the Vortex Wiki for more info.
   if (all_systems_go && armed){
-    if(digitalRead(pin_RX_operation_mode_input)){
+    if(!digitalRead(pin_RX_operation_mode_input)){
       //Manual
       set_RGBY(LOW,LOW,HIGH,LOW); //use LOW,LOW,LOW,HIGH for competition
     }
@@ -191,7 +191,7 @@ void status_lights(){
   }
   else if (all_systems_go && !armed){
 
-    if(digitalRead(pin_RX_operation_mode_input)){
+    if(!digitalRead(pin_RX_operation_mode_input)){
       //Manual - unarmed (yellow-red flash)
       set_RGBY(LOW,LOW,HIGH,HIGH); //use HIGH,LOW,HIGH,HIGH for competition 
     }
