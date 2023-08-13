@@ -16,8 +16,6 @@ void setup() {
   pinMode(pin_HW_KS_input, INPUT_PULLUP);
   pinMode(pin_RX_timeout_input, INPUT_PULLUP);
   pinMode(pin_RX_operation_mode_input, INPUT_PULLUP);
-  pinMode(pin_SW_operation_mode_input, INPUT_PULLUP);
-  pinMode(pin_SW_KS_input, INPUT_PULLUP);
 
   //setup output pins
   pinMode(pin_SW_fail_safe_status_output, OUTPUT);
