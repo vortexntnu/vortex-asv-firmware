@@ -1,8 +1,12 @@
 #include <Arduino.h>
 
 // defines pins numbers
-const int trigPin = 3;
-const int echoPin = 4;
+const int trigPin1 = 4;
+const int echoPin1 = 5;
+
+const int trigPin2 = 7;
+const int echoPin2 = 8;
+
 const int buzzer = 6;
 
 //Distance when cover is on 
@@ -12,18 +16,20 @@ const unsigned int distanceClosed = 130;
 long duration;
 unsigned int distance;
 
-bool isClosed();
+bool isLidClosed();
 
 void setup() {
-  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
-  pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+  pinMode(trigPin1, OUTPUT); // Sets the trigPin1 as an Output
+  pinMode(echoPin1, INPUT); // Sets the echoPin1 as an Input
+  pinMode(trigPin2, OUTPUT); // Sets the trigPin2 as an Output
+  pinMode(echoPin2, INPUT); // Sets the echoPin2 as an Input
   pinMode(buzzer, OUTPUT);
   Serial.begin(9600); // Starts the serial communication
   Serial.println("Starting process");
 }
 
-void loop() {
-  if (isClosed()) {
+void BuzzIfLidOpen() {
+  if (isLidClosed(trigPin1, echoPin1) && isLidClosed(trigPin2, echoPin2)) {
     tone(buzzer, 1000);
     delay(100);
   }
@@ -33,7 +39,7 @@ void loop() {
 
 }
 
-bool isClosed() {
+bool isLidClosed(int trigPin, int echoPin) {
   // Clears the trigPin
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
