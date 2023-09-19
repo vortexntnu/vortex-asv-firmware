@@ -1,14 +1,16 @@
+#include <Arduino.h>
+
 // defines pins numbers
 const int trigPin = 3;
 const int echoPin = 4;
 const int buzzer = 6;
 
 //Distance when cover is on 
-const float distanceClosed = 1;
+const unsigned int distanceClosed = 130;
 
 // defines variables
 long duration;
-float distance;
+unsigned int distance;
 
 bool isClosed();
 
@@ -42,7 +44,7 @@ bool isClosed() {
   // Reads the echoPin, returns the sound wave travel time in microseconds
   duration = pulseIn(echoPin, HIGH);
   // Calculating the distance
-  distance = duration * 0.034 / 2;
+  distance = duration * 0.34 / 2;
   Serial.println(distance);
   return distance>distanceClosed;
 }
