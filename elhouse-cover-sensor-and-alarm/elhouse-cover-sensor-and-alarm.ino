@@ -23,7 +23,10 @@ void setup() {
 void loop() {
   if (isClosed()) {
     tone(buzzer, 1000);
-    delay(1000);
+    delay(100);
+  }
+  else{
+    noTone(buzzer);
   }
 
 }
