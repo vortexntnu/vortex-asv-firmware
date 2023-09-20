@@ -18,15 +18,24 @@ long duration;
 unsigned int distance;
 
 void setup() {
+  // Set up pins for 
+  setupCoverSensor();
+  setupBuzzer();
+
+  Serial.begin(9600); // Starts the serial communication
+  Serial.println("Starting process");
+}
+
+void setupCoverSensor() {
   pinMode(trigPin1, OUTPUT); // Sets the trigPin1 as an Output
   pinMode(echoPin1, INPUT); // Sets the echoPin1 as an Input
   pinMode(trigPin2, OUTPUT); // Sets the trigPin2 as an Output
   pinMode(echoPin2, INPUT); // Sets the echoPin2 as an Input
+}
+
+void setupBuzzer() {
   pinMode(buzzerPin, OUTPUT);
   pinMode(switchPin, INPUT);
-
-  Serial.begin(9600); // Starts the serial communication
-  Serial.println("Starting process");
 }
 
 bool isLidClosed(int trigPin, int echoPin) {
@@ -43,13 +52,13 @@ bool isLidClosed(int trigPin, int echoPin) {
   distance = duration * 0.34 / 2;
   Serial.println(distance);
 
-  return distance>distanceClosed;
+  return distance > distanceClosed;
 }
 
 void BuzzIfLidOpen() {
-
+  // read state of the switch to turn off the buzzer system
   int stateOfSwitch = digitalRead(switchPin);
-
+  // blocks buzzer from making sound if the switch for the buzzer is turned off
   if (stateOfSwitch == HIGH){
     if (isLidClosed(trigPin1, echoPin1) && isLidClosed(trigPin2, echoPin2)) {
       tone(buzzerPin, 1000);
@@ -64,4 +73,6 @@ void BuzzIfLidOpen() {
   }
 }
 
-void loop(){}
+void loop(){
+  BuzzIfLidOpen();
+}
