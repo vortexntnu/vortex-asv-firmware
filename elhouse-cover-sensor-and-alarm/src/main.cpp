@@ -38,6 +38,17 @@ void setupBuzzer() {
   pinMode(switchPin, INPUT);
 }
 
+bool systemOn(int switchPin) {
+  // Read state of the switch to turn off the buzzer system
+  bool stateOfSwitch = digitalRead(switchPin);
+  // Make sure the buzzer is off when the cover sensor is off
+  if (!stateOfSwitch){
+    noTone(buzzerPin);
+  }
+  // Function returns a boolean value representing if the system should be on or not
+  return stateOfSwitch;
+}
+
 bool isLidClosed(int trigPin, int echoPin) {
   // Clears the trigPin
   digitalWrite(trigPin, LOW);
@@ -56,23 +67,26 @@ bool isLidClosed(int trigPin, int echoPin) {
 }
 
 void BuzzIfLidOpen() {
-  // read state of the switch to turn off the buzzer system
-  int stateOfSwitch = digitalRead(switchPin);
-  // blocks buzzer from making sound if the switch for the buzzer is turned off
-  if (stateOfSwitch == HIGH){
-    if (isLidClosed(trigPin1, echoPin1) && isLidClosed(trigPin2, echoPin2)) {
-      tone(buzzerPin, 1000);
-      delay(100);
-    }
-    else{
-      noTone(buzzerPin);
-    }
+  
+  // Blocks buzzer from making sound if the switch for the buzzer is turned off
+  //if (stateOfSwitch == HIGH){
+    // 
+  if (isLidClosed(trigPin1, echoPin1) && isLidClosed(trigPin2, echoPin2)) {
+    tone(buzzerPin, 1000);
+    delay(100);
   }
-  else{
+  else{         // Does not sound alarm
     noTone(buzzerPin);
   }
+  //}
+  /*else{           // Does not sound alarm
+    noTone(buzzerPin);
+  }*/
 }
 
 void loop(){
-  BuzzIfLidOpen();
+  if (systemOn()){
+    BuzzIfLidOpen();
+  }
+  
 }
