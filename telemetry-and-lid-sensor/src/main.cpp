@@ -111,7 +111,9 @@ bool systemOn() {
   return stateOfSwitch;
 }
 
-bool isLidClosed(int trigPin, int echoPin) {
+bool isLidClosed(int trigPin, int echoPin, unsigned int distanceClosed) {
+  long duration;
+  unsigned int distance;
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
@@ -124,7 +126,7 @@ bool isLidClosed(int trigPin, int echoPin) {
 
 void BuzzIfLidOpen() {
   if (systemOn()) {
-    if (isLidClosed(trigPin1, echoPin1) && isLidClosed(trigPin2, echoPin2)) {
+    if (isLidClosed(trigPin1, echoPin1,130) && isLidClosed(trigPin2, echoPin2,50)) {
       tone(buzzerPin, 1000);
       delay(100);
     } else {
