@@ -9,7 +9,12 @@
 #define TEMP_PIN_5 A7
 #define TEMP_RES 4700 // resistance of thermistor at room temperature
 #define TEMP_VDRES 10000 // resistance of voltage divider
-#define TEMP_BETA 3799.42 // beta value of thermistor
+#define TEMP_BETA 2679.52 // beta value of thermistor
+/*
+25  4k7
+50  2k345
+75  1k285
+*/
 #define TEMP_AMB 298.15 // ambient temperature in Kelvin
 #define Voltage 5.000 // voltage of Arduino
 
@@ -18,14 +23,14 @@
 #define TX_PIN 1
 
 // Ultrasonic sensor pins
-const int trigPin1 = 4;
-const int echoPin1 = 5;
-const int trigPin2 = 7;
-const int echoPin2 = 8;
+#define TRIG_PIN_1 4
+#define ECHO_PIN_1 3
+#define TRIG_PIN_2 8
+#define ECHO_PIN_2 7
 
 // Buzzer and switch pins
-const int switchPin = 3;
-const int buzzerPin = 6;
+#define SWITCH_PIN 2
+#define BUZZER_PIN 6
 
 byte i2c_rcv; // data received from I2C bus
 unsigned long time_start; // start time in mSec
@@ -44,6 +49,20 @@ bool systemOn();
 bool isLidClosed(int trigPin, int echoPin);
 void BuzzIfLidOpen();
 
+float testPrint(int trigPin, int echoPin){ // for testing purposes
+  long duration;
+  unsigned int distance;
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  duration = pulseIn(echoPin, HIGH);
+  distance = duration * 0.34 / 2;
+  return distance;
+}
+
+
 void setup() {
   Serial.begin(9600);
   Wire.begin(I2C_ADDR);
@@ -52,18 +71,21 @@ void setup() {
   i2c_rcv = 255;
   time_start = millis();
 
-  pinMode(trigPin1, OUTPUT);
-  pinMode(echoPin1, INPUT);
-  pinMode(trigPin2, OUTPUT);
-  pinMode(echoPin2, INPUT);
-  pinMode(buzzerPin, OUTPUT);
-  pinMode(switchPin, INPUT);
+  pinMode(TRIG_PIN_1, OUTPUT);
+  pinMode(ECHO_PIN_2, INPUT);
+  pinMode(TRIG_PIN_2, OUTPUT);
+  pinMode(ECHO_PIN_2, INPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(SWITCH_PIN, INPUT);
 
   Serial.println("Starting process");
 }
 
 void loop() {
-  Serial.println(getTemps());
+  //Serial.println(getTemps());
+  Serial.println(testPrint(TRIG_PIN_1, ECHO_PIN_1));
+  Serial.println(testPrint(TRIG_PIN_2, ECHO_PIN_2));
+  Serial.println("");
   BuzzIfLidOpen();
   delay(1000);
 }
@@ -93,6 +115,7 @@ String getTemps() {
          String(resistanceToTemp(TEMP_PIN_5) - 273.15);
 }
 
+
 void dataRcv(int numBytes) {
   while (Wire.available()) {
     i2c_rcv = Wire.read();
@@ -104,9 +127,9 @@ void dataRqst() {
 }
 
 bool systemOn() {
-  bool stateOfSwitch = digitalRead(switchPin);
+  bool stateOfSwitch = digitalRead(SWITCH_PIN);
   if (!stateOfSwitch) {
-    noTone(buzzerPin);
+    noTone(BUZZER_PIN);
   }
   return stateOfSwitch;
 }
@@ -126,13 +149,13 @@ bool isLidClosed(int trigPin, int echoPin, unsigned int distanceClosed) {
 
 void BuzzIfLidOpen() {
   if (systemOn()) {
-    if (isLidClosed(trigPin1, echoPin1,130) && isLidClosed(trigPin2, echoPin2,50)) {
-      tone(buzzerPin, 1000);
+    if (isLidClosed(TRIG_PIN_1, ECHO_PIN_1,130) && isLidClosed(TRIG_PIN_2, ECHO_PIN_2,50)) {
+      tone(BUZZER_PIN, 1000);
       delay(100);
     } else {
-      noTone(buzzerPin);
+      noTone(BUZZER_PIN);
     }
   } else {
-    noTone(buzzerPin);
+    noTone(BUZZER_PIN);
   }
 }
