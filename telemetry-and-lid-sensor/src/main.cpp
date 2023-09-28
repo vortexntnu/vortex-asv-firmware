@@ -29,11 +29,13 @@
 #define ECHO_PIN_2 7
 
 // Buzzer and switch pins
-#define SWITCH_PIN 2
+#define SWITCH_PIN 11
 #define BUZZER_PIN 6
 
 byte i2c_rcv; // data received from I2C bus
 unsigned long time_start; // start time in mSec
+
+bool defaultSwitchState;
 
 // Function declarations
 float floatMap(float x, float in_min, float in_max, float out_min, float out_max);
@@ -78,16 +80,21 @@ void setup() {
   pinMode(BUZZER_PIN, OUTPUT);
   pinMode(SWITCH_PIN, INPUT);
 
+  defaultSwitchState = digitalRead(SWITCH_PIN);
+
   Serial.println("Starting process");
 }
 
 void loop() {
-  //Serial.println(getTemps());
+  
+  Serial.println("");
   Serial.println(testPrint(TRIG_PIN_1, ECHO_PIN_1));
   Serial.println(testPrint(TRIG_PIN_2, ECHO_PIN_2));
   Serial.println("");
+
   BuzzIfLidOpen();
-  delay(1000);
+
+  //delay(1000);
 }
 
 float floatMap(float x, float in_min, float in_max, float out_min, float out_max) {
@@ -128,10 +135,13 @@ void dataRqst() {
 
 bool systemOn() {
   bool stateOfSwitch = digitalRead(SWITCH_PIN);
-  if (!stateOfSwitch) {
+  if (stateOfSwitch == defaultSwitchState) {
     noTone(BUZZER_PIN);
+    return true;
+  } 
+  else {
+    return false;
   }
-  return stateOfSwitch;
 }
 
 bool isLidClosed(int trigPin, int echoPin, unsigned int distanceClosed) {
@@ -149,7 +159,7 @@ bool isLidClosed(int trigPin, int echoPin, unsigned int distanceClosed) {
 
 void BuzzIfLidOpen() {
   if (systemOn()) {
-    if (isLidClosed(TRIG_PIN_1, ECHO_PIN_1,130) && isLidClosed(TRIG_PIN_2, ECHO_PIN_2,50)) {
+    if (isLidClosed(TRIG_PIN_1, ECHO_PIN_1,130) || isLidClosed(TRIG_PIN_2, ECHO_PIN_2,50)) {
       tone(BUZZER_PIN, 1000);
       delay(100);
     } else {
