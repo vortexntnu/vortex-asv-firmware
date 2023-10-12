@@ -1,16 +1,18 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#define TEMP_PIN_0 A0
-#define TEMP_PIN_1 A1
-#define TEMP_PIN_2 A2
-#define TEMP_PIN_3 A3
-#define TEMP_PIN_4 A6
-#define TEMP_PIN_5 A7
+//////////////////////////////////////////////////////////////////////////////////////
+
+#define TEMP_PIN_0 A0 //motorcontroller 1
+#define TEMP_PIN_1 A1 //motorcontroller 2
+#define TEMP_PIN_2 A2 //motorcontroller 3
+#define TEMP_PIN_3 A3 //motorcontroller 4
+#define TEMP_PIN_4 A6 //ambient 2
+#define TEMP_PIN_5 A7 //ambient 1
 #define TEMP_RES 4700 // resistance of thermistor at room temperature
 #define TEMP_VDRES 10000 // resistance of voltage divider
 #define TEMP_BETA 2679.52 // beta value of thermistor
-/*
+/* resistance values at certain temperatures (in celcius)
 25  4k7
 50  2k345
 75  1k285
@@ -51,19 +53,8 @@ bool systemOn();
 bool isLidClosed(int trigPin, int echoPin);
 void BuzzIfLidOpen();
 
-float testPrint(int trigPin, int echoPin){ // for testing purposes
-  long duration;
-  unsigned int distance;
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  duration = pulseIn(echoPin, HIGH);
-  distance = duration * 0.34 / 2;
-  return distance;
-}
-
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
 
 void setup() {
   Serial.begin(9600);
@@ -86,16 +77,16 @@ void setup() {
 }
 
 void loop() {
+
+  // getTemps(); returns a string with all the temperatures
+  // isLidClosed(); returns true if the lid is closed
   
-  Serial.println("");
-  Serial.println(testPrint(TRIG_PIN_1, ECHO_PIN_1));
-  Serial.println(testPrint(TRIG_PIN_2, ECHO_PIN_2));
-  Serial.println("");
 
   BuzzIfLidOpen();
-
-  //delay(1000);
 }
+
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
 
 float floatMap(float x, float in_min, float in_max, float out_min, float out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -169,3 +160,5 @@ void BuzzIfLidOpen() {
     noTone(BUZZER_PIN);
   }
 }
+
+//////////////////////////////////////////////////////////////////////////////////////
