@@ -30,6 +30,10 @@
 #define TRIG_PIN_2 8
 #define ECHO_PIN_2 7
 
+// Ultrasonic distance values
+#define DISTANCE_CLOSED_1 150
+#define DISTANCE_CLOSED_2 100
+
 // Buzzer and switch pins
 #define SWITCH_PIN 11
 #define BUZZER_PIN 6
@@ -52,6 +56,9 @@ void setupBuzzer();
 bool systemOn();
 bool isLidClosed(int trigPin, int echoPin);
 void BuzzIfLidOpen();
+
+float lastValues1[] = {0,0,0,0,0}; //last 5 values of ultrasound sensor 1
+float lastValues2[] = {0,0,0,0,0}; //last 5 values of ultrasound sensor 2
 
 //////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
@@ -148,9 +155,29 @@ bool isLidClosed(int trigPin, int echoPin, unsigned int distanceClosed) {
   return distance > distanceClosed;
 }
 
+float lidDistance(int trigPin, int echoPin) {
+  long duration;
+  unsigned int distance;
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  duration = pulseIn(echoPin, HIGH);
+  distance = duration * 0.34 / 2;
+  return distance;
+}
+
 void BuzzIfLidOpen() {
   if (systemOn()) {
-    if (isLidClosed(TRIG_PIN_1, ECHO_PIN_1,130) || isLidClosed(TRIG_PIN_2, ECHO_PIN_2,50)) {
+
+    lastValues1[4]=lastValues1[3];lastValues1[3]=lastValues1[2];lastValues1[2]=lastValues1[1];lastValues1[1]=lastValues1[0];
+    lastValues1[0]=lidDistance(TRIG_PIN_1, ECHO_PIN_1);
+
+    lastValues2[4]=lastValues2[3];lastValues2[3]=lastValues2[2];lastValues2[2]=lastValues2[1];lastValues2[1]=lastValues2[0];
+    lastValues2[0]=lidDistance(TRIG_PIN_2, ECHO_PIN_2);
+
+    if ((lastValues1[0]+lastValues1[1]+lastValues1[2]+lastValues1[3]+lastValues1[4])/5 > DISTANCE_CLOSED_1 || (lastValues2[0]+lastValues2[1]+lastValues2[2]+lastValues2[3]+lastValues2[4])/5 > DISTANCE_CLOSED_2) {
       tone(BUZZER_PIN, 1000);
       delay(100);
     } else {
