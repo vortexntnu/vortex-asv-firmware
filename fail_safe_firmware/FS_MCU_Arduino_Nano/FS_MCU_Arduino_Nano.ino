@@ -217,8 +217,8 @@ void status_lights(){
 
 void set_RGBY(bool R, bool G, bool B, bool Y){
   //due to incorrectly selected Mosfet, states are inverted
-  digitalWrite(pin_status_light_R_output, !R);    //RED status pin 
-  digitalWrite(pin_status_light_G_output, !G);    //GREEN status pin 
-  digitalWrite(pin_status_light_B_output, !B);    //BLUE status pin 
-  digitalWrite(pin_status_light_Y_output, !Y);    //YELLOW status pin
+  digitalWrite(pin_status_light_R_output, R);    //RED status pin 
+  digitalWrite(pin_status_light_G_output, G);    //GREEN status pin 
+  digitalWrite(pin_status_light_B_output, B);    //BLUE status pin 
+  digitalWrite(pin_status_light_Y_output, Y);    //YELLOW status pin
 }
