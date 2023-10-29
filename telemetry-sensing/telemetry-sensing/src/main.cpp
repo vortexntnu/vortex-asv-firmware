@@ -1,9 +1,11 @@
 #include <Arduino.h>
-#include<TEMPERATURE.h>
-#include<I2C.h>
-#include<BUZZER.h>
-#include<DISTANCE.h>
+#include <TEMPERATURE.h>
+#include <I2C.h>
+#include <BUZZER.h>
+#include <DISTANCE.h>
+#include <BUTTON.h>
 
+bool button_start_state;
 
 void setup() {
 
@@ -30,7 +32,16 @@ void setup() {
 
   DISTANCE::CoverSensor_init(); 
 
-
+  // Button logic
+  /*
+   * Initialize button
+   * 
+   * Read the first state of the button
+   * This is done so that what ever the state of the button is right now, we will always have to toggle the switch to turn off the annoying buzzer
+   * This is because people forget to reset the electronics jesjes
+   */  
+  BUTTON::init();
+  button_start_state = BUTTON::get_state();
 }
 
 
@@ -40,8 +51,13 @@ void loop() {
   Serial.println(DISTANCE::Getdistance(8,7));
   Serial.println(DISTANCE::Is_lid_open());
 
-
-  BUZZER::Set_Buzzer(DISTANCE::Is_lid_open());
+  // Buzz the beeper only if both lid and button is in active state
+  if (BUTTON::get_state() == button_start_state) {
+    BUZZER::Set_Buzzer(DISTANCE::Is_lid_open());
+  }
+  else {
+    BUZZER::Set_Buzzer(0);
+  }
 
   Serial.println(TEMPERATURE::getTemps());
   Serial.println("");
