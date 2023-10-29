@@ -12,7 +12,7 @@
 #define TEMP_AMB 298.15 //ambient temperature in Kelvin
 #define Voltage 5.000 //voltage of arduino
 
-namespace TEMP{
+namespace TEMPERATURE{
     
     float floatMap(float x, float in_min, float in_max, float out_min, float out_max);
     float getVoltage(int16_t pin); // Calculate the voltage drop across the thermistor
