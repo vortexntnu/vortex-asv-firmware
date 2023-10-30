@@ -2,10 +2,10 @@
 #include <Servo.h>
 #include <Wire.h>
 
-#define ESC_PIN1 11
-#define ESC_PIN2 10
+#define ESC_PIN1 5
+#define ESC_PIN2 6
 #define ESC_PIN3 9
-#define ESC_PIN4 6
+#define ESC_PIN4 10
 #define ARMING_PWM 1500 // 1500 ms
 #define STARTUP_DELAY 1500 // 1.5 s
 #define I2C_ADDRESS 0x21
