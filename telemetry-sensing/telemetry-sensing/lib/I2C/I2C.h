@@ -8,7 +8,4 @@
 namespace I2C{
 
     void init(byte &i2c_rcv, uint32_t &time_start); // initialize global variables
-    
-    void dataRcv(int numBytes); //received data handler function
-    void dataRqst(); // requests data handler function
 }

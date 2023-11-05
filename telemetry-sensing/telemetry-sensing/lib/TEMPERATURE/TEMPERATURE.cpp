@@ -1,6 +1,17 @@
 #include <TEMPERATURE.h>
 
 namespace TEMPERATURE{
+
+  void Temperature_sensors_init(){
+
+    pinMode(TEMP_PIN_0, INPUT); 
+    pinMode(TEMP_PIN_1, INPUT); 
+    pinMode(TEMP_PIN_2, INPUT);
+    pinMode(TEMP_PIN_3, INPUT);
+    pinMode(TEMP_PIN_4, INPUT); 
+    pinMode(TEMP_PIN_5, INPUT);  
+
+  }
   
   float floatMap(float x, float in_min, float in_max, float out_min, float out_max) {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;

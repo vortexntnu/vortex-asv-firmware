@@ -14,6 +14,7 @@
 
 namespace TEMPERATURE{
     
+    void Temperature_sensors_init();
     float floatMap(float x, float in_min, float in_max, float out_min, float out_max);
     float getVoltage(int16_t pin); // Calculate the voltage drop across the thermistor
     float voltageToResistance(int16_t pin);
