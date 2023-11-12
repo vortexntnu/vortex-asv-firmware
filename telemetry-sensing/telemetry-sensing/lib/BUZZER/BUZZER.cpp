@@ -2,7 +2,7 @@
 
 namespace BUZZER{
     
-    void Buzzer_init() {
+    void init() {
         pinMode(buzzerPin, OUTPUT);
         pinMode(switchPin, INPUT);
     }

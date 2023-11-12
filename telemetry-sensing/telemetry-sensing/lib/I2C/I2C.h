@@ -1,11 +1,13 @@
-#include<Arduino.h>
+#include <Arduino.h>
 #include <Wire.h>
 
-#define I2C_ADDR 0x08   // I2C address of this slave device             
-#define RX_PIN 0        // I2C pin number on which to receive data
-#define TX_PIN 1
+// I2C address of this slave device used globally
+#define I2C_ADDR 0x22
 
-namespace I2C{
+namespace I2C {
+    // Used globally to interact and send data through I2C, bu manipulating this variable we send data through I2C that we want
+    extern float* temperatureData;
 
-    void init(byte &i2c_rcv, uint32_t &time_start); // initialize global variables
+    void requestEventHandler();
+    void init();
 }

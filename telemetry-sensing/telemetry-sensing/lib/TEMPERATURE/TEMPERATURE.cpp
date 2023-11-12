@@ -1,16 +1,13 @@
 #include <TEMPERATURE.h>
 
 namespace TEMPERATURE{
-
-  void Temperature_sensors_init(){
-
+  void init(){
     pinMode(TEMP_PIN_0, INPUT); 
     pinMode(TEMP_PIN_1, INPUT); 
     pinMode(TEMP_PIN_2, INPUT);
     pinMode(TEMP_PIN_3, INPUT);
     pinMode(TEMP_PIN_4, INPUT); 
     pinMode(TEMP_PIN_5, INPUT);  
-
   }
   
   float floatMap(float x, float in_min, float in_max, float out_min, float out_max) {
@@ -34,13 +31,16 @@ namespace TEMPERATURE{
     return T_in_K - 273.15;
   }
 
-  String getTemps(){
-    return String(KtoC(resistanceToTemp(TEMP_PIN_0))) + 
-    "," + String(KtoC(resistanceToTemp(TEMP_PIN_1))) + 
-    "," + String(KtoC(resistanceToTemp(TEMP_PIN_2))) + 
-    "," + String(KtoC(resistanceToTemp(TEMP_PIN_3))) + 
-    "," + String(KtoC(resistanceToTemp(TEMP_PIN_4))) + 
-    "," + String(KtoC(resistanceToTemp(TEMP_PIN_5)));
+  float* getTemps(){
+    float* temperatures = new float[6]{
+      KtoC(resistanceToTemp(TEMP_PIN_0)),
+      KtoC(resistanceToTemp(TEMP_PIN_1)),
+      KtoC(resistanceToTemp(TEMP_PIN_2)),
+      KtoC(resistanceToTemp(TEMP_PIN_3)),
+      KtoC(resistanceToTemp(TEMP_PIN_4)),
+      KtoC(resistanceToTemp(TEMP_PIN_5))
+      };
+    return temperatures;
   }
 
 }

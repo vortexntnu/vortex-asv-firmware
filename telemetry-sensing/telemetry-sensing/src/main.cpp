@@ -9,40 +9,19 @@ bool button_start_state;
 
 void setup() {
   Serial.begin(9600);
+  delay(1000);
 
-  //byte i2c_rcv;          // data received from I2C bus
-  //uint32_t time_start;   // start time in mSec
-  //I2C::init(i2c_rcv, time_start);         
-	
-	// event handler initializations
-	//Wire.onReceive(I2C::dataRcv);    // register an event handler for received data
-	//Wire.onRequest(I2C::dataRqst);   // register an event handler for data requests
-	
-  //---------------------------------------------------------------------
-  //setup I2C
+  // Set up communication ----------
+  I2C::init();
+  delay(1000);
 
-   Wire.begin(I2C_ADDR); // join I2C bus as Slave with address 0x08
+  // Set up sensors ----------
+  TEMPERATURE::init();
 
-  //---------------------------------------------------------------------
-  //SETUP THE BUZZER
-
-  TEMPERATURE::Temperature_sensors_init();
-
-  //---------------------------------------------------------------------
-  //SETUP THE BUZZER
-
-  BUZZER::Buzzer_init();
-
-  //---------------------------------------------------------------------
-  //SETUP THE DISTANCE SENSOR
-
-  DISTANCE::CoverSensor_init(); 
-
-  //---------------------------------------------------------------------
-  //SETUP THE DISTANCE BUTTON
-
+  // Set up Buzzer system ----------
+  BUZZER::init();
+  DISTANCE::init(); 
   BUTTON::init();
-  button_start_state = BUTTON::get_state();
 
   // Button logic
   /*
@@ -51,40 +30,41 @@ void setup() {
    * Read the first state of the button
    * This is done so that what ever the state of the button is right now, we will always have to toggle the switch to turn off the annoying buzzer
    * This is because people forget to reset the electronics
-   */  
+   */ 
+  button_start_state = BUTTON::get_state();
 }
 
 
 void loop() {
-
   // Buzz the beeper only if both lid and button is in active state
-  if (BUTTON::get_state() == button_start_state) {
-    BUZZER::Set_Buzzer(DISTANCE::Is_lid_open());
+  if ((BUTTON::get_state() == button_start_state) and (DISTANCE::lid_is_open())) {
+    BUZZER::Set_Buzzer(1);
   }
   else {
     BUZZER::Set_Buzzer(0);
   }
 
+  // Get temperature
+  float* temperatures = TEMPERATURE::getTemps();
 
-  // Send Temperature trough I2C
+  // Send all 6 temperature sensors data back to master
+  for (int i = 0; i < 6; i++) {
+    I2C::temperatureData[i] = temperatures[i];
+  }
 
-  Wire.beginTransmission(I2C_ADDR); 
-  Wire.write(TEMPERATURE::getTemps().c_str());  
-  //const char* myCString = myString.c_str();                
-  Wire.endTransmission(); 
+  // For debugging
+  Serial.println(DISTANCE::get_distance(trigPin1, echoPin1));
+  Serial.println(DISTANCE::get_distance(trigPin2, echoPin2));
+  Serial.println(DISTANCE::lid_is_open());
 
-  delay(1000);  
-
-  //For debugging
-
-  Serial.println(DISTANCE::Getdistance(4,3));
-  Serial.println(DISTANCE::Getdistance(8,7));
-  Serial.println(DISTANCE::Is_lid_open());
-
-  Serial.println(TEMPERATURE::getTemps());
+  for (int i = 0; i < 6; i++) {
+    Serial.print(temperatures[i]); //
+    Serial.print(", ");
+  }
+  delete[] temperatures;
   Serial.println("");
 
-
+  delay(1000);
 }
 
 
