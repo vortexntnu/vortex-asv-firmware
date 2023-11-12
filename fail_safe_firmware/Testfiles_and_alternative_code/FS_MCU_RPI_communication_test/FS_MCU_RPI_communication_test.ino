@@ -78,77 +78,24 @@ void setup() {
 }
 
 void loop() {
-  armed = digitalRead(pin_arm_input);
-  if (armed){
-    digitalWrite(pin_LED_armed_output,HIGH);
-  }
-  else{
-    digitalWrite(pin_LED_armed_output,LOW);
-    set_main_output(LOW);
-  }
-
-  //assume all is well, but check if any tests fail 
-  all_systems_go = true;
-
-  //OtA KS test
-  test_fail_safe_trigger(pin_OtA_KS_input, pin_LED_OtA_KS_status_output);
-  
-  //HW KS test
-  test_fail_safe_trigger(pin_HW_KS_input, pin_LED_HW_KS_status_output);
-  
-  //RX timeout test
-  test_fail_safe_trigger(pin_RX_timeout_input, pin_LED_RX_timeout_output);
-  
-  //SW KS test
-  if (analogRead(pin_SW_KS_input)>analog_logic_high_cutoff){
-    digitalWrite(pin_LED_SW_KS_status_output,LOW);
-    // Serial.println("HIGH");
-    // Serial.println(analogRead(pin_SW_KS_input));
-
-  }
-  else{
-    digitalWrite(pin_LED_SW_KS_status_output,HIGH);
+    //test SW operation mode
+    if (analogRead(pin_SW_operation_mode_input)>analog_logic_high_cutoff){
+      set_RGBY(LOW, LOW, LOW, HIGH);
+    }
+    else{set_RGBY(LOW, HIGH, LOW, LOW);}
+    delay(1000); //1 Second solid "Blue"
+    set_RGBY(LOW, LOW, LOW, LOW);
+    delay(333); //.333 Second blackout
     
-    all_systems_go = false;
-    fail_safe_locked = true;
-    digitalWrite(pin_LED_FS_locked_output,HIGH);
-    set_main_output(LOW);
-    // Serial.println("LOW");
-    // Serial.println(analogRead(pin_SW_KS_input));
-  
-  }
+    //test SW KS
+    if (analogRead(pin_SW_KS_input)>analog_logic_high_cutoff){
+      set_RGBY(LOW, LOW, HIGH, LOW);
+    }
+    else{set_RGBY(HIGH, LOW, LOW, LOW);}
+    delay(1000); //1 Second solid "Blue"
+    set_RGBY(LOW, LOW, LOW, LOW);
+    delay(333); //.333 Second blackout
 
-
-  if (fail_safe_locked){
-    digitalWrite(pin_LED_FS_locked_output,HIGH);
-    
-    //try to unlock KS
-    if (armed){
-      all_systems_go = false; //neccessary for status light to be "red" colour
-    }
-    else if (all_systems_go){
-      fail_safe_locked = false;
-      digitalWrite(pin_LED_FS_locked_output,LOW);
-    }
-  else{
-    }
-  }
-  
-  //KS not locked
-  else{
-    if(armed){
-      if (all_systems_go){
-        set_main_output(HIGH);
-      }
-      else{
-        set_main_output(LOW);
-      } 
-    }
-    else{
-      set_main_output(LOW);
-    }
-  }
-  status_lights();   
 }
 
 void test_fail_safe_trigger(byte input_pin, byte LED_output_pin){
@@ -173,7 +120,7 @@ void set_main_output(bool main_output_value){
 void status_lights(){
   //Set pins to control the status light indicating ASV operation mode. Reference the Vortex Wiki for more info.
   if (all_systems_go && armed){
-    if(!digitalRead(pin_RX_operation_mode_input)){
+    if(digitalRead(pin_RX_operation_mode_input)){
       //Manual
       set_RGBY(LOW,LOW,HIGH,LOW); //use LOW,LOW,LOW,HIGH for competition
     }
@@ -191,7 +138,7 @@ void status_lights(){
   }
   else if (all_systems_go && !armed){
 
-    if(!digitalRead(pin_RX_operation_mode_input)){
+    if(digitalRead(pin_RX_operation_mode_input)){
       //Manual - unarmed (yellow-red flash)
       set_RGBY(LOW,LOW,HIGH,HIGH); //use HIGH,LOW,HIGH,HIGH for competition 
     }
@@ -217,8 +164,8 @@ void status_lights(){
 
 void set_RGBY(bool R, bool G, bool B, bool Y){
   //due to incorrectly selected Mosfet, states are inverted
-  digitalWrite(pin_status_light_R_output, R);    //RED status pin 
-  digitalWrite(pin_status_light_G_output, G);    //GREEN status pin 
-  digitalWrite(pin_status_light_B_output, B);    //BLUE status pin 
-  digitalWrite(pin_status_light_Y_output, Y);    //YELLOW status pin
+  digitalWrite(pin_status_light_R_output, !R);    //RED status pin 
+  digitalWrite(pin_status_light_G_output, !G);    //GREEN status pin 
+  digitalWrite(pin_status_light_B_output, !B);    //BLUE status pin 
+  digitalWrite(pin_status_light_Y_output, !Y);    //YELLOW status pin
 }
