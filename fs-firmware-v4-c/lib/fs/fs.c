@@ -1,6 +1,6 @@
 #include "fs.h"
 
-void fs::test_fs_trigger(byte input_pin, byte led_output_pin)
+void test_fs_trigger(byte input_pin, byte led_output_pin)
 {
     if (digitalRead(input_pin))
     {
@@ -11,18 +11,18 @@ void fs::test_fs_trigger(byte input_pin, byte led_output_pin)
         allSystemsGo = false;
         fsLocked = true;
         digitalWrite(LED_FS_LOCKED_STATUS, HIGH);
-        fs::set_main_output(LOW);
+        set_main_output(LOW);
         digitalWrite(led_output_pin, HIGH);
     }
 }
 
-void fs::set_main_output(bool main_output_value)
+void set_main_output(bool main_output_value)
 {
     digitalWrite(FS_MC_OUTPUT, main_output_value);
     digitalWrite(LED_SW_OM, main_output_value);
 }
 
-void fs::test_sw_ks(byte input_pin)
+void test_sw_ks(byte input_pin)
 {
     if (analogRead(input_pin) > analogLogicHighCutoff)
     {
@@ -35,11 +35,11 @@ void fs::test_sw_ks(byte input_pin)
         allSystemsGo = false;
         fsLocked = true;
         digitalWrite(LED_FS_LOCKED_STATUS, HIGH);
-        fs::set_main_output(LOW);
+        set_main_output(LOW);
     }
 }
 
-void fs::temperature_check()
+void temperature_check()
 {
 
     while (temp >= maxLevelLimit && temperatureLevel != 5)
