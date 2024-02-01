@@ -3,7 +3,7 @@
 
 #include "gpio.h"
 
-void set_rgby(bool r, bool g, bool b, bool y);
+void set_rgby(char colour[1], int state);
 void test_24v_status();
 void test_leds();
 void run();

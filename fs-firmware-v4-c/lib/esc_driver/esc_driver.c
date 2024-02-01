@@ -2,10 +2,15 @@
 
 void esc_setup()
 {
-    ESC1_attach(ESC_PIN1);
-    ESC2_attach(ESC_PIN2);
-    ESC3_attach(ESC_PIN3);
-    ESC4_attach(ESC_PIN4);
+    Servo ESC1;
+    Servo ESC2;
+    Servo ESC3;
+    Servo ESC4;
+
+    ESC1.attach(ESC_PIN1, minPulseWidth, maxPulseWidth);
+    ESC2.attach(ESC_PIN2, minPulseWidth, maxPulseWidth);
+    ESC3.attach(ESC_PIN3, minPulseWidth, maxPulseWidth);
+    ESC4.attach(ESC_PIN4, minPulseWidth, maxPulseWidth);
 
     arm_thrusters();
     delay(STARTUP_DELAY);
@@ -22,7 +27,7 @@ void arm_thrusters()
     ESC4.writeMicroseconds(ARMING_PWM);
 }
 
-void drive_thrusters(int PWM_ESC1, int PWM_ESC2, int PWM_ESC3, int PWM_ESC4)
+int drive_thrusters(int PWM_ESC1, int PWM_ESC2, int PWM_ESC3, int PWM_ESC4)
 {
     ESC1.writeMicroseconds(PWM_ESC1);
     ESC2.writeMicroseconds(PWM_ESC2);

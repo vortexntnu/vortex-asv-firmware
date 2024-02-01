@@ -33,66 +33,73 @@
 void gpio_setup()
 {
     // OUTPUT PINS:
-    ESC_PINS_DIR |= 0x78;      // Set PH3, PH4, PH5, PH6 as output (ESC1, ESC2, ESC3, ESC4)
+    ESC_PINS_DIR |= 0x78;      // Set PH3, PH4, PH5, PH6 as output (ESCx_PIN)
     FS_MCU_OUTPUT_DIR |= 0x10; // Set PB4 as output (FS_MCU_OUTPUT)
     MIXED_DIR1 |= 0x03;        // Set PG0, PG1 as output (DEBUG_MODE_BUTTON, LED_OVERTEMP)
     MIXED_DIR2 |= 0x78;        // Set PA3, PA4, PA5, PA6 as output (LED_RED, LED_GREEN, LED_BLUE, LED_YELLOW)
     LEDS_DIR = 0xFF;           // Set all PC pins as output (LED_BENJAMIN_DEBUGGER, LED_RX_TO, LED_OtA_KS, LED_SW_KS, LED_HW_KS, LED_FS_LOCKED, LED_OM, LED_THRUSTERS_ARMED)
 
     // INPUT PINS:
-    E_FUSES_DIR &= 0x80; // Set all PL pins as input except PL7 (E_FUSE_ESC1, E_FUSE_ESC2, E_FUSE_ESC3, E_FUSE_ESC4, E_FUSE_RELAY, E_FUSE_HW_KS, E_FUSE_TEMP_SESNORS)
-    MIXED_DIR1 &= 0xFB;  // Set PG2 as input (PRECHARGE_RELAY1)
-    MIXED_DIR2 &= 0x7F;  // Set PA7 as input (PRECHARGE_RELAY2)
-    SENSORS_DIR &= 0x01; // Set all PF pins as input except PF0 (AMBIENT_TEMP_SENSOR_1, AMBIENT_TEMP_SENSOR_2, PCB_TEMP_SENSOR, ESC1_TEMP_SENSOR, ESC2_TEMP_SENSOR, ESC3_TEMP_SENSOR, ESC4_TEMP_SENSOR
-    BUTTONS_DIR = 0x00;  // Set all PK pins as input (BUTTON_KS, RC_OM, RC_THRUSTERS_ARMED, RC_OtA_KS, RC_ESC1_PWM, RC_ESC2_PWM, RC_ESC3_PWM, RC_ESC4_PWM)
+    E_FUSES_DIR &= 0x80;    // Set all PL pins as input except PL7 (E_FUSE_ESCx, E_FUSE_RELAY, E_FUSE_HW_KS, E_FUSE_TEMP_SESNORS)
+    MIXED_DIR1 &= 0xFA;     // Set PG2 and PG0 as input (PRECHARGE_RELAY1 and DEBUG_MODE_BUTTON)
+    MIXED_DIR2 &= 0x7F;     // Set PA7 as input (PRECHARGE_RELAY2)
+    SENSORS_DIR &= 0x01;    // Set all PF pins as input except PF0 (AMBIENT_TEMP_SENSOR_x, PCB_TEMP_SENSOR, ESC1_TEMP_SENSOR, ESC2_TEMP_SENSOR, ESC3_TEMP_SENSOR, ESC4_TEMP_SENSOR
+    RC_ESC_PWM_DIR &= 0x0F; // Set PE4, PE5, PE6, PE7 as input (RC_ESCx_PWM)
+    BUTTONS_DIR &= 0xFC;    // Set PK0 and PK1 as input (RC_OM, RC_THRUSTERS_ARMED)
+    KS_DIR &= 0xF3;         // Set PD2 and PD3 as input (RC_OtA_KS, BUTTON_KS)
 
     /*
-        The code above translates to the following, in Arduino C:
-            pinMode(6, OUTPUT);
-            pinMode(7, OUTPUT);
-            pinMode(8, OUTPUT);
-            pinMode(9, OUTPUT);
-            pinMode(10, OUTPUT);
+        The code above translates to the following, in Arduino C
+        To use this, uncomment the #include <Arduino.h> in the header file on line 12.
+        Then uncomment the arduino pin defines in the header file lines 152-204
+        and comment the bit defines in the header file, lines 84-144:
+            pinMode(ESC1_PIN, OUTPUT);
+            pinMode(ESC2_PIN, OUTPUT);
+            pinMode(ESC3_PIN, OUTPUT);
+            pinMode(ESC4_PIN, OUTPUT);
+            pinMode(FC_MCU_OUTPUT, OUTPUT);
 
-            pinMode(40, OUTPUT);
-            pinMode(37, OUTPUT);
-            pinMode(36, OUTPUT);
-            pinMode(35, OUTPUT);
-            pinMode(34, OUTPUT);
-            pinMode(33, OUTPUT);
-            pinMode(32, OUTPUT);
-            pinMode(31, OUTPUT);
-            pinMode(30, OUTPUT);
-            pinMode(28, OUTPUT);
-            pinMode(27, OUTPUT);
-            pinMode(26, OUTPUT);
-            pinMode(25, OUTPUT);
+            pinMode(LED_OVERTEMP, OUTPUT);
+            pinMode(LED_BENJAMIN_DEBUGGER, OUTPUT);
+            pinMode(LED_RX_TO, OUTPUT);
+            pinMode(LED_OtA_KS, OUTPUT);
+            pinMode(LED_SW_KS, OUTPUT);
+            pinMode(LED_HW_KS, OUTPUT);
+            pinMode(LED_FS_LOCKED, OUTPUT);
+            pinMode(LED_OM, OUTPUT);
+            pinMode(LED_THRUSTERS_ARMED, OUTPUT);
 
-            pinMode(49, INPUT);
-            pinMode(48, INPUT);
-            pinMode(47, INPUT);
-            pinMode(46, INPUT);
-            pinMode(45, INPUT);
-            pinMode(44, INPUT);
-            pinMode(43, INPUT);
+            pinMode(LED_RED, OUTPUT);
+            pinMode(LED_GREEN, OUTPUT);
+            pinMode(LED_BLUE, OUTPUT);
+            pinMode(LED_YELLOW, OUTPUT);
 
-            pinMode(39, INPUT);
-            pinMode(29, INPUT);
+            pinMode(RC_ESC1_PWM, INPUT);
+            pinMode(RC_ESC2_PWM, INPUT);
+            pinMode(RC_ESC3_PWM, INPUT);    // NP! Change the header file definition since it is defined as Not_An_Arduino_Pin
+            pinMode(RC_ESC4_PWM, INPUT);    // NP! Change the header file definition since it is defined as Not_An_Arduino_Pin
 
-            pinMode(A1, INPUT);
-            pinMode(A2, INPUT);
-            pinMode(A3, INPUT);
-            pinMode(A4, INPUT);
-            pinMode(A5, INPUT);
-            pinMode(A6, INPUT);
-            pinMode(A7, INPUT);
-            pinMode(A8, INPUT);
-            pinMode(A9, INPUT);
-            pinMode(A10, INPUT);
-            pinMode(A11, INPUT);
-            pinMode(A12, INPUT);
-            pinMode(A13, INPUT);
-            pinMode(A14, INPUT);
-            pinMode(A15, INPUT);
+            pinMode(E_FUSE_ESC1, INPUT);
+            pinMode(E_FUSE_ESC2, INPUT);
+            pinMode(E_FUSE_ESC3, INPUT);
+            pinMode(E_FUSE_ESC4, INPUT);
+            pinMode(E_FUSE_RELAY, INPUT);
+            pinMode(E_FUSE_HW_KS, INPUT);
+            pinMode(E_FUSE_TEMP_SESNORS, INPUT);
+
+            pinMode(DEBUG_MODE_BUTTON, INPUT);
+
+            pinMode(PRECHARGE_RELAY1, INPUT);
+            pinMode(PRECHARGE_RELAY2, INPUT);
+
+            pinMode(AMBIENT_TEMP_SENSOR_2, INPUT);
+            pinMode(AMBIENT_TEMP_SENSOR_1, INPUT);
+            pinMode(PCB_TEMP_SENSOR, INPUT);
+            pinMode(ESC4_TEMP_SENSOR, INPUT);
+            pinMode(ESC3_TEMP_SENSOR, INPUT);
+            pinMode(ESC2_TEMP_SENSOR, INPUT);
+            pinMode(ESC1_TEMP_SENSOR, INPUT);
+            pinMode(RC_ARM_THRUSTERS, INPUT);
+            pinMode(RC_OM, INPUT);
     */
 }

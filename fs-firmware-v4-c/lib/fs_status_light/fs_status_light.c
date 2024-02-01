@@ -1,7 +1,8 @@
 #include "fs_status_light.h"
 
-void set_rgby(bool r, bool g, bool b, bool y)
-{
+/*
+    void set_rgby(bool r, bool g, bool b, bool y)
+    {
     if (r)
     {
         MIXED_PORT2 |= (1 << LED_RED); // Set pin 3 on MIXED_PORT2
@@ -38,14 +39,84 @@ void set_rgby(bool r, bool g, bool b, bool y)
         MIXED_PORT2 &= ~(1 << LED_YELLOW); // Clear pin 6 on MIXED_PORT2
     }
 
-    /*
+
         The following code is the same as the above, but in Arduino C:
         Which I admit is a lot easier to read, but I wanted to use the bitwise operators.
             digitalWrite(LED_RED, r);
             digitalWrite(LED_GREEN, g);
             digitalWrite(LED_BLUE, b);
             digitalWrite(LED_YELLOW, y);
-    */
+
+    }
+*/
+
+void set_rgby(char colour[1], int state)
+{
+    switch (colour[0])
+    {
+    case 'r' || 'R':
+        if (state == HIGH)
+        {
+            MIXED_PORT2 |= (1 << LED_RED);
+        }
+        else
+        {
+            MIXED_PORT2 &= ~(1 << LED_RED);
+        }
+        break;
+    case 'g' || 'G':
+        if (state == HIGH)
+        {
+            MIXED_PORT2 |= (1 << LED_GREEN);
+        }
+        else
+        {
+            MIXED_PORT2 &= ~(1 << LED_GREEN);
+        }
+        break;
+    case 'b' || 'B':
+        if (state == HIGH)
+        {
+            MIXED_PORT2 |= (1 << LED_BLUE);
+        }
+        else
+        {
+            MIXED_PORT2 &= ~(1 << LED_BLUE);
+        }
+        break;
+    case 'y' || 'Y':
+        if (state == HIGH)
+        {
+            MIXED_PORT2 |= (1 << LED_YELLOW);
+        }
+        else
+        {
+            MIXED_PORT2 &= ~(1 << LED_YELLOW);
+        }
+        break;
+    case 'a' || 'A':
+        if (state == HIGH)
+        {
+            MIXED_PORT2 |= (1 << LED_RED);
+            MIXED_PORT2 |= (1 << LED_GREEN);
+            MIXED_PORT2 |= (1 << LED_BLUE);
+            MIXED_PORT2 |= (1 << LED_YELLOW);
+        }
+        else
+        {
+            MIXED_PORT2 &= ~(1 << LED_RED);
+            MIXED_PORT2 &= ~(1 << LED_GREEN);
+            MIXED_PORT2 &= ~(1 << LED_BLUE);
+            MIXED_PORT2 &= ~(1 << LED_YELLOW);
+        }
+        break;
+    default:
+        MIXED_PORT2 &= ~(1 << LED_RED);
+        MIXED_PORT2 &= ~(1 << LED_GREEN);
+        MIXED_PORT2 &= ~(1 << LED_BLUE);
+        MIXED_PORT2 &= ~(1 << LED_YELLOW);
+        break;
+    }
 }
 
 void run()

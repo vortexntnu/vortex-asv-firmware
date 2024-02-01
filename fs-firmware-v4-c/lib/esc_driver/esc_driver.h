@@ -1,6 +1,7 @@
 #ifndef ESC_Driver_H
 #define ESC_Driver_H
 
+#include "gpio.h"
 #include <Servo.h>
 #include <Wire.h>
 #include <Arduino.h>
@@ -13,12 +14,15 @@
 #define ARMING_PWM 1500
 #define STARTUP_DELAY 15000
 
+#define minPulseWidth 1100
+#define maxPulseWidth 1900
+
 #define I2C_ADDRESS 0x21
 
-Servo ESC1;
-Servo ESC2;
-Servo ESC3;
-Servo ESC4;
+// Servo ESC1;
+// Servo ESC2;
+// Servo ESC3;
+// Servo ESC4;
 
 void arm_thrusters();
 void disarm_thrusters();
