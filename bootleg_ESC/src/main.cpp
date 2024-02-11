@@ -56,21 +56,24 @@ void drive_thrusters(int PWM_ESC1, int PWM_ESC2, int PWM_ESC3, int PWM_ESC4) {
   ESC4.writeMicroseconds(PWM_ESC4);
 }
 
+// This function is called automatically whenever I2C data is received.
 void receiveMessage(int bytes) {
-  if (bytes == 8) { // Check if 8 bytes (4 x 16-bit integers) are received
+  // Check if the received data is exactly 8 bytes long, as expected
+  if (bytes == 8) {
+    // Loop to read the 8 bytes (4 x 16-bit values) from the I2C buffer
     int PWM_values[4];
-
-    // Read the I2C data and convert bytes to 16-bit integers
     for (int i = 0; i < 4; i++) {
+      // Read the most significant byte (MSB) and least significant byte (LSB) for each value
       int msb = Wire.read();
       int lsb = Wire.read();
+      // Combine MSB and LSB to form the 16-bit integer PWM value
       PWM_values[i] = (msb << 8) | lsb;
     }
 
-    // Drive thrusters
+    // Drive the thrusters with the received PWM values
     drive_thrusters(PWM_values[0], PWM_values[1], PWM_values[2], PWM_values[3]);
 
-    // Debugging
+    // Log the PWM values for debugging purposes
     Serial.print("PWM values: ");
     for (int i = 0; i < 4; i++) {
       Serial.print(PWM_values[i]);
@@ -78,6 +81,10 @@ void receiveMessage(int bytes) {
     }
     Serial.println();
   } else {
+    // If the received data length does not match the expected 8 bytes, log an error and clear the buffer to reset I2C data transfer
     Serial.println("Invalid data length received!");
+    while(Wire.available() > 0) {
+      Wire.read();
+    }
   }
 }
