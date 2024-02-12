@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <inttypes.h>
 
 #include <avr/io.h>
 #include <util/delay.h>
@@ -13,7 +14,7 @@
 
 /*
     The following defines to the addresses of the registers for the pins
-    are taken from the Arduino Mega 2560 datasheet.
+    are taken from the  Atmega 2560 datasheet.
     The datasheet can be found here:
     https://ww1.microchip.com/downloads/en/devicedoc/atmel-2549-8-bit-avr-microcontroller-atmega640-1280-1281-2560-2561_datasheet.pdf
     The datasheet is also included in the docs folder of this project.

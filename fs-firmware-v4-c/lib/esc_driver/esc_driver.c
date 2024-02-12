@@ -1,52 +1,50 @@
 #include "esc_driver.h"
 
-void esc_setup()
+void timer1_init(void)
 {
-    Servo ESC1;
-    Servo ESC2;
-    Servo ESC3;
-    Servo ESC4;
+    // Set timer 1 to Fast PWM mode, 16-bit
+    TCCR1A |= (1 << WGM11)(1 << COM1A1)(1 << COM1B1)(1 << COM1C1);
 
-    ESC1.attach(ESC_PIN1, minPulseWidth, maxPulseWidth);
-    ESC2.attach(ESC_PIN2, minPulseWidth, maxPulseWidth);
-    ESC3.attach(ESC_PIN3, minPulseWidth, maxPulseWidth);
-    ESC4.attach(ESC_PIN4, minPulseWidth, maxPulseWidth);
+    TCCR1B |= (1 << WGM13)(1 << WGM12)(1 << CS11); // Set prescaler to 8
 
-    arm_thrusters();
-    delay(STARTUP_DELAY);
+    ICR1 = 39999; // Set TOP value to 39999
 
-    Wire.begin(I2C_ADDRESS);
-    Wire.onReceive(receive_i2c_message);
+    // Set duty cycle to 0
+    OCR1A = 0;
 }
 
-void arm_thrusters()
+void arm_esc(void)
 {
-    ESC1.writeMicroseconds(ARMING_PWM);
-    ESC2.writeMicroseconds(ARMING_PWM);
-    ESC3.writeMicroseconds(ARMING_PWM);
-    ESC4.writeMicroseconds(ARMING_PWM);
+    // Set duty cycle to 50%
+    OCR1A = ARMING_PWM;
+    OCR1B = ARMING_PWM;
+    OCR1C = ARMING_PWM;
+    OCR1D = ARMING_PWM;
+
+    // Wait for 1.5 seconds
+    _delay_ms(STARTUP_DELAY);
 }
 
-int drive_thrusters(int PWM_ESC1, int PWM_ESC2, int PWM_ESC3, int PWM_ESC4)
+void set_esc_speed(int PWM_ESC1, int PWM_ESC2, int PWM_ESC3, int PWM_ESC4)
 {
-    ESC1.writeMicroseconds(PWM_ESC1);
-    ESC2.writeMicroseconds(PWM_ESC2);
-    ESC3.writeMicroseconds(PWM_ESC3);
-    ESC4.writeMicroseconds(PWM_ESC4);
+    // Set duty cycle to the desired PWM value
+    OCR1A = PWM_ESC1;
+    OCR1B = PWM_ESC2;
+    OCR1C = PWM_ESC3;
+    OCR1D = PWM_ESC4;
+
+    // Wait for 20ms to allow the ESCs to update
+    _delay_ms(20);
 }
 
-void receive_i2c_message(int bytes)
+void disarm_esc(void)
 {
-    if (bytes == 8)
-    {
-        int pwm_values[4];
+    // Set duty cycle to 0
+    OCR1A = 0;
+    OCR1B = 0;
+    OCR1C = 0;
+    OCR1D = 0;
 
-        for (int i = 0; i < 4; i++)
-        {
-            pwm_values[i] = Wire.read() << 8;
-            pwm_values[i] |= Wire.read();
-        }
-
-        drive_thrusters(pwm_values[0], pwm_values[1], pwm_values[2], pwm_values[3]);
-    }
+    // wait for 20ms to allow the ESCs to update
+    _delay_ms(20);
 }

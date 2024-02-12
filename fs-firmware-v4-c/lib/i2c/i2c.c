@@ -1,7 +1,5 @@
 
-#include "i2c/i2c.h"
-
-volatile uint8_t status = 0;
+#include "i2c.h"
 
 ISR(TWI_vect)
 {
@@ -96,5 +94,10 @@ void twi_read(void)
 
 void twi_match_wrtie_slave(void)
 {
-    while ((TWSR & TW_NO_INFO) !=)
+    while ((TWSR & TW_NO_INFO) != TW_ST_SLA_ACK)
+    {
+        TWCR = (1 << TWEA) | (1 << TWEM) | (1 << TWINT);
+        while (!(TWCR & (1 << TWINT)))
+            ;
+    }
 }
