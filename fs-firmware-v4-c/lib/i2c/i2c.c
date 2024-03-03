@@ -1,103 +1,92 @@
-
+/*
+    * File:   i2c.c
+    * Version: 1.0
+    * Author: Ibrahim F. Abdalaal
+    * Organisation: Vortex NTNU
+    * Created on:  2023-11-20
+    * Last update: 2024-03-03
+    * Tested on: N/A
+    * 
+    * Description:  This file implements the TWI interface for the slave device.
+    *               for the atmega2560 microcontroller.           
+*/
 #include "i2c.h"
 
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/twi.h>
+
+// Initialise the TWI interface
+void TWI_init(void)
+{
+    // Set slave address and enable global call 
+    TWAR = (SLAVE_ADDRESS << 1) | (1 << TWGCE);
+
+    // Enable TWI and TWI ACK  
+    TWCR = (1 << TWEN) | (1 << TWEA);
+    TWCR &= ~(1 << TWSTA) & ~(1 << TWSTO) & ~(1 << TWWC) & ~(1 << TWINT);
+}
+
+// TWI interrupt service routine 
 ISR(TWI_vect)
 {
+    // Status register
+    uint8_t status = TWSR & 0xF8;
 
-    if ((TWSR & TW_NO_INFO) == TW_SR_SLA_ACK || (TWSR & TW_NO_INFO) == TW_SR_ARB_LOST_SLA_ACK)
+    // If the slave address is received, check the status
+    switch (status)
     {
-        TWCR = (1 << TWINT) | (1 << TWEA) | (1 << TWEN) | (1 << TWIE);
-    }
-    else if ((TWSR & TW_NO_INFO) == TW_SR_DATA_ACK || (TWSR & TW_NO_INFO) == TW_SR_DATA_NACK)
-    {
-        status = TWDR;
+        // If master sends a write request, read the data and store it in the thrusters_values array
+        case TWI_SR_DATA_ACK:
+            thrusters_values[TWI_RX_BUFFER_INDEX++] = TWDR;
+            if(TWI_RX_BUFFER_INDEX >= TWI_RX_BUFFER_SIZE)
+             {
+                TWI_RX_BUFFER_INDEX = 0;
+             }
+             SLAVE_END_TWI();
+            break;
 
-        TWCR = (1 << TWINT) | (1 << TWEA) | (1 << TWEN) | (1 << TWIE);
-    }
-    else
-    {
-        TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWIE);
-    }
-}
+        // If the master sends a read request, send the sensor values
+        case TWI_ST_SLA_ACK:
+            TWI_TX_BUFFER_INDEX = 0;
+            TWDR = sensor_values[TWI_TX_BUFFER_INDEX++];
+            SLAVE_END_TWI();
+            break;
 
-void twi_init(uint8_t sub_address)
-{
-    // sub for submissi... I mean subscriber...
-    TWAR = sub_address << 1;
-    TWCR = (1 << TWEN) | (1 << TWIE) | (1 << TWEA);
-    sei();
-}
+        // If a data byte is transmitted, send the next byte, if available
+        case TWI_ST_DATA_ACK:
+            if(TWI_TX_BUFFER_INDEX < TWI_TX_BUFFER_SIZE)
+            {
+                TWDR = sensor_values[TWI_TX_BUFFER_INDEX++];
+            }
+            else
+            {
+                TWDR = 0xFF; 
+            }
+            SLAVE_END_TWI();
+            break;
 
-int8_t i2c_listen()
-{
-    while (1)
-    {
-        uint8_t status;
-        while (!(TWCR & (1 << TWINT)))
-            ;
-        status = TWSR & 0xF8;
-        if (status == 0x60 || status == 0x68)
-        {
-            return 0;
-        }
-        if (status == 0xA8 || status == 0xB0)
-        {
-            return 1;
-        }
-        if (status == 0x70 || status == 0x78)
-        {
-            return 2;
-        }
-        else
-        {
-            continue;
-        }
-    }
-}
+        // If the last byte is transmitted, end the TWI communication
+        case TWI_ST_LAST_DATA_ACK:
+            SLAVE_END_TWI();
+            break;
 
-int8_t i2c_transmit(char data)
-{
-    uint8_t status;
-    TWDR = data;
-    TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWEA);
+        // If the master sends a stop condition, end the TWI communication
+        case TWI_ST_DATA_NACK:
+            SLAVE_END_TWI();
+            break;
 
-    while (!(TWCR & (1 << TWINT)))
-        ;
-    status = TWSR & 0xF8;
-    if (status == 0xA0)
-    {
-        TWCR |= (1 << TWINT);
-        return -1;
+        // If the bus error occurs, reset the TWI interface
+        case TWI_BUS_ERROR:
+            TWCR = (1 << TWSTO) | (1 << TWEN);
+            TWCR = (1 << TWEN) | (1 << TWEA) | (1 << TWINT);
+            break;
+
+        // Otherwise, enable TWI and TWI ACK
+        default:  
+            TWCR = (1 << TWEN) | (1 << TWEA);
+            TWCR &= ~(1 << TWSTA) & ~(1 << TWSTO) & ~(1 << TWWC) & ~(1 << TWINT);
+            break;     
     }
 }
 
-void twi_match_read_slave(void)
-{
-    while ((TWSR & TW_NO_INFO) != TW_SR_SLA_ACK)
-    {
-        TWCR = (1 << TWEA) | (1 << TWEM) | (1 << TWINT);
-        while (!(TWCR & (1 << TWINT)))
-            ;
-    }
-}
-
-void twi_read(void)
-{
-    TWCR = (1 << TWINT) | (1 << TWEA) | (1 << TWEN);
-    while (!(TWCR & (1 << TWINT)))
-        ;
-    while ((TWSR & TW_NO_INFO) != TW_SR_DATA_ACK)
-        ;
-    recv_data = TWDR;
-    PORTB = recv_data;
-}
-
-void twi_match_wrtie_slave(void)
-{
-    while ((TWSR & TW_NO_INFO) != TW_ST_SLA_ACK)
-    {
-        TWCR = (1 << TWEA) | (1 << TWEM) | (1 << TWINT);
-        while (!(TWCR & (1 << TWINT)))
-            ;
-    }
-}
