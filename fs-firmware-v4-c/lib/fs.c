@@ -1,7 +1,6 @@
-#include "fs.h"
+#include <fs.h>
 
 #include <avr/io.h>
-#include <avr/interrupt.h>
 
 ISR(INT2_vect)
 {
@@ -25,7 +24,5 @@ void fs_init(void)
 
     // Enable the KS interrupts
     EIMSK |= (1 << INT2) | (1 << INT3);
-
-    // Enable global interrupts
-    sei();
+    
 }

@@ -1,0 +1,40 @@
+PROJECT = fs-firmware-v4-c_test
+
+MCU = atmega2560
+F_CPU = 16000000UL
+PROGRAMMER = atmelice_isp
+
+SRC = $(wildcard *.c)
+
+INCLUDES = $(wildcard *.h)
+
+CFLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Wall -Os
+
+LDFLAGS = -mmcu=$(MCU)
+
+OBJ = $(SRC:.c=.o)
+HEX = $(PROJECT).hex
+
+CC = avr-gcc
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(PROJECT).elf: $(OBJ)
+	$(CC) $(LDFLAGS) $< -o $@
+
+$(HEX): $(PROJECT).elf
+	avr-objcopy -O ihex $< $@
+
+compile_and_upload_i2c: $(SRC)
+	$(CC) -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Wall -Os i2c/i2c.c -o build/i2c.o
+	avr-objcopy -O ihex build/i2c.o build/i2c.hex
+	avrdude -p $(MCU) -c $(PROGRAMMER) -U flash:w:build/i2c.hex:i
+
+compile_and_upload_blink: $(SRC)
+	$(CC) -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Wall -Os blink/blink.c -o build/blink.o
+	avr-objcopy -O ihex build/blink.o build/blink.hex
+	avrdude -p $(MCU) -c $(PROGRAMMER) -U flash:w:build/blink.hex:i
+
+clean:
+	rm -f $(OBJ) $(PROJECT).elf $(HEX)

@@ -12,3 +12,19 @@ Software that provides low level control of hardware on Vortex' Autonomous Surfa
     * Used to shut down and lock thruster-relays in case of emergency.
     * Used to toggle between autonomous or manual remote control operation.
     * Used to control the status light that indicates the ASV's mode of operation. 
+
+
+```json
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/vortex-asv-firmware/fs-firmware-v4-c/include/**",
+                "/usr/lib/avr/include/"
+            ]
+        }
+    ],
+    "version": 4
+}
+```

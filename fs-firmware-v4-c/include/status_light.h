@@ -28,6 +28,14 @@
 #define LED_OVERTEMP_STATUS     0x02
 
 void LED_init(void);
+
+/**
+ * @brief      Function to set the status of the LEDs
+ * @param      uint8_t status
+ * @return     void
+ * @details    This function sets the status of the LEDs
+ * @info      The status is a byte with the following bits:
+*/
 void set_rgby(uint8_t r, uint8_t g, uint8_t b, uint8_t y);
 void test_rgby(void);
 void test_leds(void);

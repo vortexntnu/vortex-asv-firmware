@@ -1,4 +1,4 @@
-#include "status_light.h"
+#include <status_light.h>
 
 #include <avr/io.h>
 #include <util/delay.h>
