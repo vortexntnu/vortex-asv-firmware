@@ -21,18 +21,19 @@ void setup() {
   pinMode(pin_SW_fail_safe_status_output, OUTPUT);
   pinMode(pin_main_output, OUTPUT);
   pinMode(pin_LED_FS_locked_output, OUTPUT);
-  pinMode(pin_status_light_Y_output, OUTPUT);
   pinMode(pin_LED_RX_timeout_output, OUTPUT);
   pinMode(pin_LED_armed_output, OUTPUT);
-  pinMode(pin_status_light_B_output, OUTPUT);
-  pinMode(pin_status_light_G_output, OUTPUT);
   pinMode(pin_LED_SW_KS_status_output, OUTPUT);
   pinMode(pin_LED_HW_KS_status_output, OUTPUT);
   pinMode(pin_LED_OtA_KS_status_output, OUTPUT);
-  pinMode(pin_status_light_R_output, OUTPUT);
 
-  //blackout of 24V-Status-Light
-  set_RGBY(LOW, LOW, LOW, LOW);
+  pinMode(pin_LED_R_output, output);
+  pinMode(pin_LED_G_output, output);
+  pinMode(pin_LED_Y_output, output);
+
+  digitalWrite(pin_LED_Y_output, LOW);
+  digitalWrite(pin_LED_G_output, LOW);
+  digitalWrite(pin_LED_R_output, LOW);
 
   //test FS-PCB-LEDs
   digitalWrite(pin_LED_FS_locked_output, HIGH);
@@ -53,28 +54,8 @@ void setup() {
 
   //test 24V-Status-Light
   
-  set_RGBY(HIGH, LOW, LOW, LOW);
-  delay(1000); //1 Second solid "Red"
-  set_RGBY(LOW, LOW, LOW, LOW);
-  delay(333); //.333 Second blackout
-
-  set_RGBY(LOW, HIGH, LOW, LOW);
-  delay(1000); //1 Second solid "Green"
-  set_RGBY(LOW, LOW, LOW, LOW);
-  delay(333); //.333 Second blackout
-
-  set_RGBY(LOW, LOW, HIGH, LOW);
-  delay(1000); //1 Second solid "Blue"
-  set_RGBY(LOW, LOW, LOW, LOW);
-  delay(333); //.333 Second blackout
-
-  set_RGBY(LOW, LOW, LOW, HIGH);
-  delay(1000); //1 Second solid "Yellow"
-  
-  set_RGBY(LOW, LOW, LOW, LOW);
-  delay(2000); //2 Second blackout
-
-  //Setup finished
+  startup_sequence();
+  set_LED_RGY(DIMMED_BRIGHTNESS, DIMMED_BRIGHTNESS, DIMMED_BRIGHTNESS);
 }
 
 void loop() {
@@ -175,35 +156,35 @@ void status_lights(){
   if (all_systems_go && armed){
     if(!digitalRead(pin_RX_operation_mode_input)){
       //Manual
-      set_RGBY(LOW,LOW,HIGH,LOW); //use LOW,LOW,LOW,HIGH for competition
+      set_LED_RGY(0, 0, FULL_BRIGHTNESS);
     }
     else{
       //SW controlled
       if (analogRead(pin_SW_operation_mode_input)>analog_logic_high_cutoff){
         //Software manual control (solid yellow)
-        set_RGBY(LOW,LOW,LOW,HIGH); //change to LOW,HIGH,LOW,LOW if using simplified SW mode
+        set_LED_RGY(0, 0, FULL_BRIGHTNESS); 
       }
       else{
         //Autonomous (solid green)
-        set_RGBY(LOW, HIGH, LOW, LOW);
+        set_LED_RGY(0, FULL_BRIGHTNESS, 0);
       }
     }
   }
   else if (all_systems_go && !armed){
 
     if(!digitalRead(pin_RX_operation_mode_input)){
-      //Manual - unarmed (yellow-red flash)
-      set_RGBY(LOW,LOW,HIGH,HIGH); //use HIGH,LOW,HIGH,HIGH for competition 
+      //Manual - unarmed
+      default_pulsing_sequence();
     }
     else{
-      //SW controlled - unarmed (yellow-red flash)
+      //SW controlled - unarmed
       if (analogRead(pin_SW_operation_mode_input)>analog_logic_high_cutoff){
-        //Software manual control unarmed (yellow-red flash)
-        set_RGBY(HIGH,LOW,HIGH,HIGH); //change to LOW,HIGH,HIGH,LOW if using simplified SW mode
+        //Software manual control unarmed
+        default_pulsing_sequence(); 
       }
       else{
-        //Autonomous - unarmed (green-red flash)
-        set_RGBY(LOW, HIGH, HIGH, LOW);
+        //Autonomous - unarmed 
+        default_pulsing_sequence();
       }
     }
 
@@ -211,14 +192,39 @@ void status_lights(){
   
   else{
     //KS triggered
-    set_RGBY(HIGH, LOW, LOW, LOW); 
+    set_LED_RGY(FULL_BRIGHTNESS, 0, 0); 
   }
 }
 
-void set_RGBY(bool R, bool G, bool B, bool Y){
-  //due to incorrectly selected Mosfet, states are inverted
-  digitalWrite(pin_status_light_R_output, R);    //RED status pin 
-  digitalWrite(pin_status_light_G_output, G);    //GREEN status pin 
-  digitalWrite(pin_status_light_B_output, B);    //BLUE status pin 
-  digitalWrite(pin_status_light_Y_output, Y);    //YELLOW status pin
+void startup_sequence() {
+  set_LED_RGY(DIMMED_BRIGHTNESS, 0, 0);
+  delay(1000);
+  set_LED_RGY(0, DIMMED_BRIGHTNESS, 0);
+  delay(1000);
+  set_LED_RGY(0, 0, DIMMED_BRIGHTNESS);
+  delay(1000);
+  set_LED_RGY(0, 0, 0);
+  delay(1000);
 }
+
+void default_pulsing_sequence() {
+  for(int i = 0; i < 50; i += 5) {
+    analogWrite(pin_LED_R_output, i);
+    analogWrite(pin_LED_G_output, i);
+    analogWrite(pin_LED_Y_output, i);
+    delay(30);
+  }
+  for(int i = 50; i >= 0; i -= 5) {
+    analogWrite(pin_LED_R_output, i);
+    analogWrite(pin_LED_G_output, i);
+    analogWrite(pin_LED_Y_output, i);
+    delay(30);
+  }
+}
+
+void set_LED_RGY(byte red, byte green, byte yellow) {
+  analogWrite(pin_LED_R_output, red);    // Set Red PWM
+  analogWrite(pin_LED_G_output, green);  // Set Green PWM
+  analogWrite(pin_LED_Y_output, yellow); // Set Yellow PWM
+}
+
